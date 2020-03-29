@@ -202,7 +202,31 @@ impl<'a> std::ops::Deref for BorrowedDeclRecord<'a> {
 	}
 }
 
+pub struct QueryResult<'a, T> {
+	field_map: &'a FieldMap,
+	records: Vec<T>,
+}
 
+impl<'a, T> QueryResult<'a, T> {
+	pub fn new(field_map: &'a FieldMap, records: Vec<T>) -> Self {
+		QueryResult {
+			field_map: field_map,
+			records: records
+		}
+	}
+
+	pub fn field_map(&self) -> &'a FieldMap {
+		self.field_map
+	}
+}
+
+impl<'a, T> std::ops::Deref for QueryResult<'a, T> {
+	type Target = Vec<T>;
+
+	fn deref(&self) -> &Self::Target {
+		&self.records
+	}
+}
 
 pub struct QueryBuilder<'a> {
 	field_map: &'a FieldMap,
