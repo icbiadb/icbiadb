@@ -1,7 +1,8 @@
+[crates.io]: https://crates.io/crates/icbiadb
 
 ## IcbiaDB | I can't believe it's a database
 
-[crates.io]: https://crates.io/crates/icbiadb
+[![Latest Version]][crates.io]
 
 **Not recommended for production**
 
