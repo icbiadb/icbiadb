@@ -1,0 +1,69 @@
+
+### File layout
+
+
+**Header**
+
+0x00		u32			Declaration length
+...			u128		KV records length
+...			u128		Declaration records length
+
+** Body **
+
+... Declarations
+... KV records
+... Declaration records identifier 
+... Declaration records ...
+... Declaration records identifier 
+... Declaration records ...
+... Declaration records identifier 
+... Declaration records ...
+... and so on
+
+
+---
+
+
+### Data structure layouts
+
+
+**Declaration layout**
+
+0x00-0x01	u8			\x00x (0, 120), Identifier
+0x02		u8			Name length
+0x03		u16			Fields length
+0xB0	 	[u8]		Name(String)
+... 		[u8] 		Fields(HashMap<Vec<u8>, Vec<u8>) of field name and field type name
+			u64			Records start
+			u64			Total records length
+			u64			Number of records
+
+
+**KV records layout**
+
+0x00-0x01	u8			\x01x (1, 120), Identifier
+0x02		u8			Key length
+0x03		u8			Type name length
+0x04		u32			Value length
+0xB0	 	[u8]		Key(String)
+... 		[u8] 		Type name(String)
+	 		[u8] 		Value(See type name)
+
+
+**Declaration records layout**
+
+Which declaration group they belong to can be found in the declaration layout at the beginning of the file
+
+
+**Declaration record header layout**
+
+0x00-0x01	u8			\x02x (2, 120), Identifier
+... records
+
+
+**Declaration record layout**
+
+0x00-0x01	u8			\x03x (3, 120), Identifier
+0x02 		u32 		Value length
+... 		[u8]		Named fields(HashMap<Vec<u8>, Vec<u8>>)
+
