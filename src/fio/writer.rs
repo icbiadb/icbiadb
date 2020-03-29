@@ -11,6 +11,7 @@ pub struct Writer<T: std::io::Write + std::io::Seek> {
 	writer: T,
 	declaration_length: u32,
 	kv_records_length: u64,
+	curr_pos: usize,
 	decl_records_length: u64,
 	decl_lu_map: HashMap<Vec<u8>, u64>,
 }
@@ -21,17 +22,20 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 			writer: writer,
 			declaration_length: 0,
 			kv_records_length: 0,
+			curr_pos: 0,
 			decl_records_length: 0,
 			decl_lu_map: HashMap::new(),
 		}
 	}
 
 	pub fn dump_memory(&mut self, memory: &Memory) -> std::io::Result<()> {
-		self.write_header()?;
+		self.curr_pos += self.write_header()?;
 
 		// Declarations
 		for (name, fields) in memory.decls() {
-			self.declaration_length += self.write_declaration(name, fields)?;
+			let len = self.write_declaration(name, fields)?;
+			self.curr_pos += len as usize;
+			self.declaration_length += len;
 		}
 		self.writer.flush()?;
 
@@ -41,24 +45,27 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		for record in memory.kv_records().iter() {
 			self.kv_records_length += self.write_kv_record(record)?;
 		}
+		self.curr_pos += self.kv_records_length as usize;
 		self.writer.flush()?;
 
 		// Decl records
+		let mut decl_records_length = 0;
 		for (name, records) in memory.decl_records() {
 			let mut decl_lu_name = Vec::with_capacity(name.len() + "decl_records_start".as_bytes().len());
 			decl_lu_name.extend(name);
 			decl_lu_name.extend("decl_records_start".as_bytes());
-			self.decl_lu_map.insert(decl_lu_name, self.writer.stream_position()?);
+			self.decl_lu_map.insert(decl_lu_name, self.curr_pos as u64);
 
-			let mut decl_records_length = 0;
 			decl_records_length += self.write_decl_header()?;
 			for record in records {
 				decl_records_length += self.write_decl_record(record)?;
 			}
-
+			self.curr_pos += decl_records_length as usize;
 			self.decl_records_length += decl_records_length;
+
 			self.write_declaration_records_data(name, decl_records_length, records.len() as u64)?;
 			self.writer.seek(SeekFrom::End(0))?;
+			decl_records_length = 0;
 		}
 
 		self.write_header()?;
@@ -67,18 +74,20 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		Ok(())
 	}
 
-	pub fn write_header(&mut self) -> std::io::Result<()> {
+	pub fn write_header(&mut self) -> std::io::Result<usize> {
+		let mut length = 0;
 		self.writer.seek(SeekFrom::Start(0))?;
-		self.writer.write(&serialize(&self.declaration_length))?;
-		self.writer.write(&serialize(&self.kv_records_length))?;
-		self.writer.write(&serialize(&self.decl_records_length))?;
-		Ok(())
+		length += self.writer.write(&serialize(&self.declaration_length))?;
+		length += self.writer.write(&serialize(&self.kv_records_length))?;
+		length += self.writer.write(&serialize(&self.decl_records_length))?;
+		Ok(length)
 	}
 
 	pub fn write_declaration(&mut self, name: &Vec<u8>, fields: &FieldMap) -> std::io::Result<u32> {
 		// Identifier, name length, fields length, name, fields
 		let ser_fields = serialize(fields);
 		let mut length = 0;
+		let mut curr_pos = self.curr_pos;
 
 		length += self.writer.write(&decl::IDENT)? as u32;
 
@@ -92,7 +101,8 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		decl_lu_name.extend(name);
 		decl_lu_name.extend("header_rdata_start".as_bytes());
 
-		self.decl_lu_map.insert(decl_lu_name, self.writer.stream_position()?);
+		curr_pos += length as usize;
+		self.decl_lu_map.insert(decl_lu_name, curr_pos as u64);
 		length += self.writer.write(&serialize(&(0 as u64)))? as u32; // Records start
 		length += self.writer.write(&serialize(&(0 as u64)))? as u32; // Total records length
 		length += self.writer.write(&serialize(&(0 as u64)))? as u32; // Records count

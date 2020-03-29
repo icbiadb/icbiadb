@@ -53,7 +53,7 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 
 		// lu map<[u8], (records start, records length, records count)>
 		let (lu_map, declarations) = if header.decl_len > 0 {
-			self.read_declarations(header.decl_len).expect("[Reading KV records] Failed to declarations")
+			self.read_declarations(header.decl_len).expect("[Reading declarations] Failed to declarations")
 		} else {
 			(HashMap::new(), DeclarationMap::new())
 		};
@@ -97,8 +97,6 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 		*memory.decl_get_mut() = declarations;
 		*memory.kv_records_get_mut() = kv_records;
 		*memory.decl_records_get_mut() = decl_records;
-
-		memory.generate_lu_maps();
 
 		Ok(())
 	}

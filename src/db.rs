@@ -29,6 +29,7 @@ impl Db {
 		let f_io = FileIO::new(f);
 		let mut memory = Memory::new();
 		f_io.read_to(&mut memory)?;
+		memory.generate_lu_maps();
 		
 		Ok(Db {
 			file_name: file_name.as_ref().to_string(),
@@ -47,6 +48,7 @@ impl Db {
 		let f_io = FileIO::new(f);
 		let mut memory = Memory::new();
 		f_io.read_to(&mut memory)?;
+		memory.generate_lu_maps();
 		
 		Ok(Db {
 			file_name: file_name.as_ref().to_string(),
@@ -65,6 +67,7 @@ impl Db {
 		let f_io = FileIO::new(f);
 		let mut memory = Memory::new();
 		f_io.read_to(&mut memory)?;
+		memory.generate_lu_maps();
 
 		Ok(Db {
 			file_name: file_name.as_ref().to_string(),

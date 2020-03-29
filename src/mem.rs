@@ -51,7 +51,7 @@ impl Memory {
 			lu_map_exact.insert(k.to_vec(), i);
 			lu_map_first.entry(k[0])
 				.and_modify(|ref mut v: &mut Vec<usize>| v.push(i))
-				.or_insert(Vec::new());
+				.or_insert(vec!(i));
 		}
 
 		self.lu_map_first = lu_map_first;
@@ -87,14 +87,15 @@ impl Memory {
 		self.lu_map_exact.insert(r.0.to_vec(), self.kv_records.len());
 		self.lu_map_first.entry(r.0[0])
 			.and_modify(|v| v.push(new_idx))
-			.or_insert(Vec::new());
+			.or_insert(vec!(new_idx));
 		self.kv_records.push(r);
 	}
 
 	pub fn delete_record(&mut self, i: usize) {
 		let (k, _, _) = &self.kv_records.remove(i);
 		self.lu_map_exact.remove(k);
-		self.lu_map_first.get_mut(&k[0]).unwrap().remove_item(&i);
+		let index = self.lu_map_first.get(&k[0]).unwrap().iter().position(|r| *r == i);
+		self.lu_map_first.get_mut(&k[0]).unwrap().remove(index.unwrap());
 	}
 
 	pub fn decls(&self) -> &DeclarationMap {
