@@ -118,6 +118,10 @@ impl Db {
 		&self.memory.declaration_map()[key.as_ref().as_bytes()]
 	}
 
+	pub fn has_key<S: AsRef<str>>(&self, key: S) -> bool {
+		self.memory.has_key(key.as_ref().as_bytes())
+	}
+
 	pub fn store<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
 		let (k, t, ser_v) = (k.as_ref().as_bytes(), normalize_type_name(std::any::type_name::<T>().as_bytes()), serialize(&v));
 		assert!(k.len() > 0 && t.len() > 0);
@@ -187,11 +191,15 @@ impl Db {
 		}	
 	}
 
-	pub fn delete_record(&mut self, record: impl RecordRead) {
+	pub fn remove<S: AsRef<str>>(&mut self, key: S) {
+		self.memory.delete_record(self.memory.index_of_key(key.as_ref().as_bytes()));
+	}
+
+	pub fn remove_record(&mut self, record: impl RecordRead) {
 		self.memory.delete_record(self.memory.index_of_key(record.raw_key()));
 	}
 
-	pub fn delete_many(&mut self, records: &Vec<impl RecordRead>) {
+	pub fn remove_many(&mut self, records: &Vec<impl RecordRead>) {
 		for record in records {
 			self.memory.delete_record(self.memory.index_of_key(record.raw_key()));		
 		}

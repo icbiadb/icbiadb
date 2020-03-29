@@ -74,6 +74,10 @@ impl Memory {
 		self.lu_map_exact[key]
 	}
 
+	pub fn has_key(&self, key: &[u8]) -> bool {
+		self.lu_map_exact.contains_key(key)
+	}
+
 	pub fn char_search(&self, r#char: u8) -> Vec<&OwnedMemoryRecord> {
 		self.lu_map_first[&r#char].iter().map(|i| &self.kv_records[*i]).collect()
 	}
