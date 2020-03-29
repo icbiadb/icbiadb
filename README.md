@@ -1,8 +1,10 @@
+[Latest Version]: https://img.shields.io/crates/v/icbiadb.svg
 [crates.io]: https://crates.io/crates/icbiadb
 
 ## IcbiaDB | I can't believe it's a database
 
 [![Latest Version]][crates.io]
+
 
 **Not recommended for production**
 
