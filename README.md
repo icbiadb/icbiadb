@@ -1,8 +1,10 @@
 
 ## IcbiaDB | I can't believe it's a database
 
+[crates.io]: https://crates.io/crates/icbiadb
 
 **Not recommended for production**
+
 
 IcbiaDB is a simple headless Key-Value & data structures database with support for storing most types seamlessly. Compared to some other KV databases, IcbiaDB supports partial key searches and atomic operations without serialization, allowing for rather fast ...stuff, on big data sets.
 
