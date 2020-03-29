@@ -154,7 +154,7 @@ impl Db {
 		Record::new(k, t, v)
 	}
 
-	pub fn fetch_des<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
+	pub fn fetch_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
 		deserialize(&self.memory[key].2)
 	}
 

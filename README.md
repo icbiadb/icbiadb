@@ -25,7 +25,16 @@ Screw that! In IcbiaDB, you define the nature of the structure on the spot with 
 
 
 ```
-Insert example
+if !db.has_decl("articles") {
+	let mut articles = db.declare("articles");
+
+	articles
+		.add_field::<str>("title")
+			.option("unique", true)
+		.add_field::<str>("date");
+
+	db.insert_decl(&articles);
+}
 ```
 
 The declarative data structure functionality is supposed to allow for a dynamic complex data structure which can easily be supported in other languages. And no, I don't avoid using the word "table" for this highly innovative creation.
@@ -52,7 +61,51 @@ Example
 
 
 ```
-Insert example
+use serde::{Serialize, Deserialize};
+
+use icbiadb::prelude::*;
+use icbiadb::{serialize, deserialize};
+
+
+
+#[derive(Serialize, Deserialize)]
+struct Article {
+	title: String,
+	text: String,
+}
+
+
+fn main() -> std::io::Result<()> {
+	env_logger::init();
+
+	let mut db = icbiadb::mem()?;
+	
+	// Store & fetch, requires icbiadb::prelude::{RecordRead}
+	db.store("key:welcome", "Hello World!");
+	
+	let r = db.fetch("key:welcome");
+	println!("Key {:?} stores {:?} of type {}", r.key(), r.value::<String>(), r.type_name());
+
+	db.update("key:welcome", 100);
+	println!("{}", db.fetch_value::<i32>("key:welcome"));
+
+	let article = Article { title: "A title".to_string(), text: "Hello World!".to_string() };
+	db.store("articles:0", &article);
+
+
+	// Search & filter, requires icbiadb::prelude::{BytesSearch, BytesFilter}
+	let keys = db.starts_with("key:");
+
+	let articles = db.filter(|r| {
+		r.raw_type_name() == "IcbiaDB_tests::Article".as_bytes()
+		//With serialization, r.type_name() == "IcbiaDB_tests::Article"
+	});
+
+	println!("Found {} keys starting with \"key:\"", keys.len());
+	println!("Found {} keys of type \"Article\"", articles.len());
+
+	Ok(())
+}
 ```
 
 ---
