@@ -2,6 +2,7 @@
 ### TODO
 
 
+* Implement Bv[Type] wrapper for atomic operations on values(E.g, BvVec[3] == 100 retrieves and bitwise/deserialize compares serialized vectors fourth element, BvString.replace("hello", "hi") changes byte values and resizes)
 * Cached single-time deserialization for records
 * Nicer error-handling/more helpful panics
 * Redeclare declarations, add/remove columns, rename, change types, return records that don't fit the changes for deletion/updating(Might be useful later, if a script language is ever created for some db stuff or something)
@@ -12,7 +13,6 @@
 * Async feature
 * Migration functionality
 * ~~No references in stored type names~~ Fine-tuning needed though(\*const & \*mut isn't handled)
-* Atomic support for KV(hashmap), Slices/Vecs and tuple fields(?)
 * Atomic support on declaration records(search/select(fields?), filter, order(desc & ascd), limit)
 * Deref record with JIT/cached deserialization?
 * Speed up reading & parsing big data sets

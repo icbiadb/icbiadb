@@ -1,13 +1,10 @@
-[Latest Version]: https://img.shields.io/badge/crates.io-v0.1.0-blue.svg
-[crates.io]: https://crates.io/crates/icbiadb
 
-## IcbiaDB | I can't believe it's a database &emsp; [![Latest Version]][crates.io]
+## IcbiaDB | I can't believe it's a database
 
 
 **Not recommended for production**
 
-
-IcbiaDB is a simple headless Key-Value & data structures database with support for storing most types seamlessly. Compared to some other KV databases, IcbiaDB supports partial key searches and atomic operations without serialization, allowing for rather fast ...stuff, on big data sets.
+IcbiaDB is a simple headless Key-Value & data structures database with support for storing most types seamlessly. Compared to some other KV databases, IcbiaDB supports partial key searches and soon, atomic operations without serialization, allowing for rather fast ...stuff, on big data sets.
 
 The basic goal though, is merely a quick and dirty relatively reliable database with minimal preperation, minimal dependencies and decent performence on low-end computers and also the ability to seamlessly store, manipulate and present primitives and dynamic structures without too much hassle. Oh, and it comes with a free beer.
 
@@ -47,7 +44,7 @@ The only preparation required by IcbiaDB are for structs, they need to derive se
 
 **Serialization/Deserialization**
 
-Serialization & deserialization is not necessarily a slow procedure, but for low-end computers, valuable CPU time could be spent on reading/parsing the next record instead of mass-deserialization of data, which is a contributing factor to delays as well as some operations on higher level data types. Let's take care of stupid things like converting bytes to regular easy-to-handle types after it has been filtered, manipulated, ordered and about to be presented instead! 
+Serialization & deserialization is not necessarily a slow procedure, but for low-end computers, valuable CPU time could be spent on reading/parsing the next record instead of mass-deserialization of data, which is a contributing factor to delays just like some operations on higher-level data types. Let's take care of stupid things like converting bytes to regular easy-to-handle types after it has been filtered, manipulated, ordered and about to be presented instead! 
 
 ... IF it's not better to deserialize it earlier, then whatever. In other words, IcbiaDB _aims for_ JIT, mass- and just-once deserialization after thinning out the number of records.
 
