@@ -26,7 +26,7 @@ macro_rules! query {
 
 	($db:expr, $name:literal, select $($field:ident),+;filter $f:block) => {{
 		let mut query = $db.query($name);
-		let lam_filter = |$($field:&icbiadb::types::ByteVec),+| $f;
+		let lam_filter = |$($field:&icbiadb::types::bv::ByteVec),+| $f;
 
 		query.records().iter()
 			.filter_map(|record| {
