@@ -38,6 +38,16 @@ if !db.has_decl("articles") {
 
 	db.insert_decl(&articles);
 }
+
+query!{db, "articles",
+	insert (title="A short title", date="today"),
+	insert (title="A short title", date="yesterday")
+};
+
+let articles = query!{db, "articles",
+	select title, date;
+	filter { date == "today" }
+};
 ```
 
 The declarative data structure functionality is supposed to allow for a dynamic complex data structure which can easily be supported in other languages. And no, I don't avoid using the word "table" for this highly innovative creation.
