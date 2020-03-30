@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 
 use crate::utils::*;
-use crate::types::ByteVec;
+use crate::types::bv::ByteVec;
 use crate::db::Db;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

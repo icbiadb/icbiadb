@@ -1,4 +1,4 @@
-use crate::types::*;
+use crate::types::record::Record;
 
 
 pub trait BytesFilter {

@@ -1,10 +1,13 @@
 use crate::utils::{serialize, deserialize, normalize_type_name};
 use crate::decl::types::*;
-use crate::types::*;
 use crate::prelude::*;
 use crate::mem::{Memory, OwnedMemoryRecord};
 use crate::fio::FileIO;
 use crate::slice;
+use crate::types::{
+	record::{Record, OwnedRecord},
+};
+
 
 enum DbType {
 	InMemory,
