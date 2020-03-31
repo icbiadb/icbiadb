@@ -534,13 +534,13 @@ impl PartialOrd<u64> for &Record<'_> {
 
 impl PartialEq<u128> for &Record<'_> {
 	fn eq(&self, other: &u128) -> bool {
-		self.is_int() && self.raw_value().as_u128() == *other
+		self.is_uint() && self.raw_value().as_u128() == *other
 	}
 }
 
 impl PartialOrd<u128> for &Record<'_> {
 	fn partial_cmp(&self, other: &u128) -> Option<std::cmp::Ordering> {
-		if !self.is_int() { return None }
+		if !self.is_uint() { return None }
 
 		let value = self.raw_value().as_u128();
 		if value > *other {
