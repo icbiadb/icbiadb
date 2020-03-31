@@ -42,7 +42,7 @@ macro_rules! query {
 
 	($db:expr, $name:literal, $(insert ($($key:ident=$val:expr),+)),+) => {
 		$(
-			let row = vec![$((stringify!($key).as_bytes().to_vec(), icbiadb::serialize($val).into())),+].iter().cloned()
+			let row = vec![$((stringify!($key).as_bytes().to_vec(), icbiadb::serialize_to_bytevec(&$val))),+].iter().cloned()
 				.collect::<std::collections::HashMap<_, _>>();
 			$db.memory_mut().decl_insert_row($name, icbiadb::decl::types::DeclarationRecord::new(row));
 		)+

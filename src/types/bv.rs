@@ -214,6 +214,201 @@ impl std::cmp::PartialEq<&[u8]> for ByteVec {
 
 
 
+
+
+impl PartialEq<i16> for &ByteVec {
+	fn eq(&self, other: &i16) -> bool {
+		self.as_i16() == *other
+	}
+}
+
+impl PartialOrd<i16> for &ByteVec {
+	fn partial_cmp(&self, other: &i16) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_i16();
+		return if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<i32> for &ByteVec {
+	fn eq(&self, other: &i32) -> bool {
+		self.as_i32() == *other
+	}
+}
+
+impl PartialOrd<i32> for &ByteVec {
+	fn partial_cmp(&self, other: &i32) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_i32();
+		return if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<i64> for &ByteVec {
+	fn eq(&self, other: &i64) -> bool {
+		self.as_i64() == *other
+	}
+}
+
+impl PartialOrd<i64> for &ByteVec {
+	fn partial_cmp(&self, other: &i64) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_i64();
+		return if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<i128> for &ByteVec {
+	fn eq(&self, other: &i128) -> bool {
+		self.as_i128() == *other
+	}
+}
+
+impl PartialOrd<i128> for &ByteVec {
+	fn partial_cmp(&self, other: &i128) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_i128();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<u16> for &ByteVec {
+	fn eq(&self, other: &u16) -> bool {
+		self.as_u16() == *other
+	}
+}
+
+impl PartialOrd<u16> for &ByteVec {
+	fn partial_cmp(&self, other: &u16) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_u16();
+		return if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<u32> for &ByteVec {
+	fn eq(&self, other: &u32) -> bool {
+		self.as_u32() == *other
+	}
+}
+
+impl PartialOrd<u32> for &ByteVec {
+	fn partial_cmp(&self, other: &u32) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_u32();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<u64> for &ByteVec {
+	fn eq(&self, other: &u64) -> bool {
+		self.as_u64() == *other
+	}
+}
+
+impl PartialOrd<u64> for &ByteVec {
+	fn partial_cmp(&self, other: &u64) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_u64();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<usize> for &ByteVec {
+	fn eq(&self, other: &usize) -> bool {
+		self.as_usize() == *other
+	}
+}
+
+impl PartialOrd<usize> for &ByteVec {
+	fn partial_cmp(&self, other: &usize) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_usize();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<u128> for &ByteVec {
+	fn eq(&self, other: &u128) -> bool {
+		self.as_u128() == *other
+	}
+}
+
+impl PartialOrd<u128> for &ByteVec {
+	fn partial_cmp(&self, other: &u128) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_u128();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+
+
+
+
 #[derive(Serialize, Deserialize, Clone, Hash, Debug, Eq)]
 pub struct BvString(Vec<u8>);
 
