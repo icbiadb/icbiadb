@@ -405,6 +405,47 @@ impl PartialOrd<u128> for &ByteVec {
 	}
 }
 
+impl PartialEq<f32> for &ByteVec {
+	fn eq(&self, other: &f32) -> bool {
+		self.as_f32() == *other
+	}
+}
+
+impl PartialOrd<f32> for &ByteVec {
+	fn partial_cmp(&self, other: &f32) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_f32();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<f64> for &ByteVec {
+	fn eq(&self, other: &f64) -> bool {
+		self.as_f64() == *other
+	}
+}
+
+impl PartialOrd<f64> for &ByteVec {
+	fn partial_cmp(&self, other: &f64) -> Option<std::cmp::Ordering> {
+		
+
+		let value = self.as_f64();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
 
 
 
