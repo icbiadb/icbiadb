@@ -1,4 +1,4 @@
-[Latest Version]: https://img.shields.io/badge/crates.io-v0.1.0-blue.svg
+[Latest Version]: https://img.shields.io/badge/crates.io-v0.1.1-blue.svg
 
 [crates.io]: https://crates.io/crates/icbiadb
 [Build Status]: https://travis-ci.com/Grundligt/icbiadb.svg?branch=master
@@ -24,12 +24,12 @@ As mentioned above, store pretty much anything you like, from any serde::Seriali
 **Declarations**
 
 
-The libraries for databases I've used before usually requires pre-defined struct/classes, maybe some third-party binary for setup, derives/trait macros, callbacks/registration.. or a simple query string to execute... in rust as well as other language, i.e, preperation and then even more preperation!
+The database interfaces I've used before usually requires pre-defined struct/classes, maybe some third-party binary for setup, derives/trait macros, callbacks/registration.. or a simple query string to execute... in rust as well as other languages, i.e, preperation and then even more preperation!
 
 Screw that! In IcbiaDB, you define the nature of the structure on the spot with a few lines of code, while you're still figuring out what your data structure might consist of. You shouldn't have to think all that carefully about your database design has always been my mantra. Just type-and-go, it's almost more streamlined than World of Warcraft!
 
 
-```
+```rust
 if !db.has_decl("articles") {
 	let mut articles = db.declare("articles");
 
@@ -48,7 +48,7 @@ query!{db, "articles",
 
 let articles = query!{db, "articles",
 	select title, date;
-	filter { date == "today" }
+	filter { date == "today" && title.ends_with("title") }
 };
 ```
 
@@ -75,11 +75,10 @@ IcbiaDB stores everything as simple byte arrays and don't mess with it once its 
 Example
 
 
-```
+```rust
 use serde::{Serialize, Deserialize};
 
 use icbiadb::prelude::*;
-use icbiadb::{serialize, deserialize};
 
 
 
@@ -91,15 +90,11 @@ struct Article {
 
 
 fn main() -> std::io::Result<()> {
-	env_logger::init();
-
 	let mut db = icbiadb::mem()?;
 	
-	// Store & fetch, requires icbiadb::prelude::{RecordRead}
 	db.store("key:welcome", "Hello World!");
-	
-	let r = db.fetch("key:welcome");
-	println!("Key {:?} stores {:?} of type {}", r.key(), r.value::<String>(), r.type_name());
+	let record = db.fetch("key:welcome");
+	println!("{} stores {:?} of type {}", record.key(), record.value::<String>(), record.type_name());
 
 	db.update("key:welcome", 100);
 	println!("{}", db.fetch_value::<i32>("key:welcome"));
@@ -109,15 +104,13 @@ fn main() -> std::io::Result<()> {
 
 	db.store("string_key:0", "This string contains \"this is a string\"");
 
-	// Search & filter, requires icbiadb::prelude::{BytesSearch, BytesFilter}
 	let keys = db.starts_with("key:");
 
-	// Seamless string bytes comparison
-	let articles = db.filter(|r| {
-		r.type_name() == "IcbiaDB_tests::Article"
-		|| r == "this is a string" 
-		|| r.starts_with("hello world")
-		|| r.contains("this is a string")
+	// Seamless string bytes comparison, integers are atm converted natively(from_le_bytes)
+	let articles = db.filter(|record| {
+		record.type_name() == "IcbiaDB_tests::Article"
+		|| record.contains("this is a string")
+		|| (record > 100.0 && record < 200.0) && record.key().starts_with("calculations:")
 	});
 
 	println!("Found {} keys starting with \"key:\"", keys.len());
@@ -134,6 +127,7 @@ fn main() -> std::io::Result<()> {
 
 
 No real bench marks yet, but as an example, searching and filtering 4 million KV records and half a million decl records on an Asus E402S, Intel Dual-Core N3060, 2gb ram, single thread
+
 
 ```
 [2020-03-26T16:05:48Z DEBUG icbiadb::fio::reader] Loaded 0 Declarations, 4000000 KV records, 0 Declared records in 2.797347558s
