@@ -4,6 +4,7 @@ use crate::parser::globals::*;
 use crate::utils::{serialize};
 use crate::decl::types::*;
 use crate::mem::Memory;
+use crate::types::bv::{BvString, ByteVec};
 
 use std::io::{SeekFrom};
 
@@ -127,7 +128,7 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		Ok(())
 	}
 
-	pub fn write_kv_record(&mut self, record: &(Vec<u8>, Vec<u8>, Vec<u8>)) -> std::io::Result<u64> {
+	pub fn write_kv_record(&mut self, record: &(BvString, BvString, ByteVec)) -> std::io::Result<u64> {
 		// Identifier, name length, fields length, name, fields
 		let (k, tn, v) = record;
 		assert!(k.len() as u8 > 0 && tn.len() as u8 > 0);
@@ -141,9 +142,9 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		length += self.writer.write(&serialize(&(v.len() as u32)))? as u64;
 
 		// Values
-		length += self.writer.write(&k)? as u64;
-		length += self.writer.write(&tn)? as u64;
-		length += self.writer.write(&v)? as u64;
+		length += self.writer.write(k.as_slice())? as u64;
+		length += self.writer.write(tn.as_slice())? as u64;
+		length += self.writer.write(v.as_slice())? as u64;
 		Ok(length)
 	}
 

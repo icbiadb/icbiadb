@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Serialize, Deserialize};
 
-use crate::utils::*;
+use crate::utils::{serialize, deserialize, serialize_to_bytevec, normalize_type_name};
 use crate::types::bv::ByteVec;
 use crate::db::Db;
 
@@ -35,7 +35,7 @@ impl std::fmt::Display for FieldMap {
 			.map(|(k, v)| {
 				(k,
 				v.iter()
-					.map(|(k ,v)| (k, std::str::from_utf8(v).unwrap()))
+					.map(|(k ,v)| (k, std::str::from_utf8(v.inner()).unwrap()))
 					.collect::<Vec<_>>()
 				)
 			})
@@ -144,8 +144,8 @@ impl Declare {
 		&self.fields
 	}
 
-	pub fn data(&self) -> Vec<u8> {
-		serialize(&self.fields)
+	pub fn data(&self) -> ByteVec {
+		serialize_to_bytevec(&self.fields)
 	}
 
 	pub fn insert(&mut self, db: &mut Db) {
@@ -156,11 +156,11 @@ impl Declare {
 
 /// Used by QueryBuilder
 #[derive(Clone)]
-pub struct DeclRecordValue<'a>(&'a Vec<u8>);
+pub struct DeclRecordValue<'a>(&'a ByteVec);
 
 impl<'a> DeclRecordValue<'a> {
 	pub fn deser<T: serde::Deserialize<'a>>(&self) -> T {
-		bincode::deserialize(self.0).unwrap()
+		deserialize(self.0.inner())
 	}
 }
 
@@ -169,13 +169,13 @@ impl std::cmp::Eq for DeclRecordValue<'_> {}
 
 impl PartialEq<&str> for DeclRecordValue<'_> {
     fn eq(&self, other: &&str) -> bool {
-        self.0.as_slice() == other.as_bytes()
+        self.0.inner().as_slice() == other.as_bytes()
     }
 }
 
 impl PartialEq for DeclRecordValue<'_> {
     fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
+        self.0.inner() == other.0.inner()
     }
 }
 

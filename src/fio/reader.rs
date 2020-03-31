@@ -43,7 +43,6 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 				return Ok(())
 			}
 		};
-		//println!("{:?}", header);
 		debug!("{:?}", header);
 
 		// TODO

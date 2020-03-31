@@ -105,13 +105,17 @@ fn main() -> std::io::Result<()> {
 	let article = Article { title: "A title".to_string(), text: "Hello World!".to_string() };
 	db.store("articles:0", &article);
 
+	db.store("string_key:0", "This string contains \"this is a string\"");
 
 	// Search & filter, requires icbiadb::prelude::{BytesSearch, BytesFilter}
 	let keys = db.starts_with("key:");
 
+	// Seamless string bytes comparison
 	let articles = db.filter(|r| {
-		r.raw_type_name() == "IcbiaDB_tests::Article".as_bytes()
-		//With serialization, r.type_name() == "IcbiaDB_tests::Article"
+		r.type_name() == "IcbiaDB_tests::Article"
+		|| r == "this is a string" 
+		|| r.starts_with("hello world")
+		|| r.contains("this is a string")
 	});
 
 	println!("Found {} keys starting with \"key:\"", keys.len());

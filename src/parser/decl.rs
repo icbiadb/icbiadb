@@ -3,7 +3,8 @@ use std::collections::HashMap;
 
 use crate::decl::types::{FieldMap, DeclarationMap, DeclarationRecord};
 use crate::parser::globals::*;
-use crate::utils::{Cursor, deserialize};
+use crate::utils::deserialize;
+use crate::types::cursor::Cursor;
 
 
 pub fn extract_length(v: &[u8]) -> (usize, usize, usize) {

@@ -19,7 +19,37 @@ pub fn strip_ref_symbols(v: &[u8]) -> &[u8] {
 	rv
 }
 
+pub fn contains_sequence(v: &[u8], seq: &[u8]) -> bool {
+	if seq.len() > v.len() {
+		return false
+	}
 
+	let mut seq_i = 0;
+	for byte in v {
+
+		if *byte == seq[seq_i] {
+			seq_i += 1;
+		} else {
+			// Check if current non-equal byte instead equals the first seq byte, then we from there
+			// To avoid a bug where it fails to find some sequences, eg,
+			// v 		seq
+			// 100 		100
+			// 100 		111 Fail, start over
+			// 111		100 Fail
+			if *byte == seq[0] {
+				seq_i = 1;
+			} else {
+				seq_i = 0;
+			}
+		}
+
+		if seq_i == seq.len() {
+			return true
+		}
+	}
+
+	false
+}
 
 
 

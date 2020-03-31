@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
 use crate::decl::types::*;
+use crate::types::bv::{BvString, ByteVec};
 
 
 /// Stores byte data of key, type_name and value
-pub type OwnedMemoryRecord = (Vec<u8>, Vec<u8>, Vec<u8>);
+pub type OwnedMemoryRecord = (BvString, BvString, ByteVec);
 
 
 pub struct Memory {
@@ -82,9 +83,9 @@ impl Memory {
 		self.lu_map_first[&r#char].iter().map(|i| &self.kv_records[*i]).collect()
 	}
 
-	pub fn push_record(&mut self, r: (Vec<u8>, Vec<u8>, Vec<u8>)) {
-		if self.lu_map_exact.contains_key(&r.0) {
-			self.delete_record(self.index_of_key(&r.0))
+	pub fn push_record(&mut self, r: (BvString, BvString, ByteVec)) {
+		if self.lu_map_exact.contains_key(r.0.as_slice()) {
+			self.delete_record(self.index_of_key(r.0.as_slice()))
 		}
 
 		let new_idx = self.kv_records.len();
@@ -97,7 +98,7 @@ impl Memory {
 
 	pub fn delete_record(&mut self, i: usize) {
 		let (k, _, _) = &self.kv_records.remove(i);
-		self.lu_map_exact.remove(k);
+		self.lu_map_exact.remove(k.as_slice());
 		let index = self.lu_map_first.get(&k[0]).unwrap().iter().position(|r| *r == i);
 		self.lu_map_first.get_mut(&k[0]).unwrap().remove(index.unwrap());
 	}

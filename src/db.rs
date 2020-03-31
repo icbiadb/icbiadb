@@ -1,12 +1,10 @@
-use crate::utils::{serialize, deserialize, normalize_type_name};
+use crate::utils::{deserialize, serialize_to_bytevec, normalize_type_name};
 use crate::decl::types::*;
 use crate::prelude::*;
 use crate::mem::{Memory, OwnedMemoryRecord};
 use crate::fio::FileIO;
 use crate::slice;
-use crate::types::{
-	record::{Record, OwnedRecord},
-};
+use crate::types::record::Record;
 
 
 enum DbType {
@@ -126,36 +124,36 @@ impl Db {
 	}
 
 	pub fn store<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
-		let (k, t, ser_v) = (k.as_ref().as_bytes(), normalize_type_name(std::any::type_name::<T>().as_bytes()), serialize(&v));
+		let (k, t, ser_v) = (k.as_ref().as_bytes(), normalize_type_name(std::any::type_name::<T>().as_bytes()), serialize_to_bytevec(&v));
 		assert!(k.len() > 0 && t.len() > 0);
-		self.memory.push_record((k.to_vec(), t.to_vec(), ser_v));
+		self.memory.push_record((k.into(), t.into(), ser_v));
 	}
 
 	pub fn store_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, t: S, v: T) {
-		let (k, t, v) = (k.as_ref().as_bytes(), normalize_type_name(t.as_ref().as_bytes()), serialize(&v));
+		let (k, t, v) = (k.as_ref().as_bytes(), normalize_type_name(t.as_ref().as_bytes()), serialize_to_bytevec(&v));
 		assert!(k.len() > 0 && t.len() > 0);
-		self.memory.push_record((k.to_vec(), t.to_vec(), v.to_vec()));
+		self.memory.push_record((k.into(), t.into(), v));
 	}
 
 	pub fn store_raw<S: AsRef<str>>(&mut self, k: S, t: S, v: &[u8]) {	
 		let (k, t, v) = (k.as_ref().as_bytes(), normalize_type_name(t.as_ref().as_bytes()), v);
 		assert!(k.len() > 0 && t.len() > 0);
-		self.memory.push_record((k.to_vec(), t.to_vec(), v.to_vec()));
+		self.memory.push_record((k.into(), t.into(), v.into()));
 	}
 
 	pub fn store_many<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, values: &Vec<(S, T)>) {
 		for (k, v) in values {
-			let (k, t, v) = (k.as_ref().as_bytes(), std::any::type_name::<T>().as_bytes(), &serialize(v));
+			let (k, t, v) = (k.as_ref().as_bytes(), std::any::type_name::<T>().as_bytes(), serialize_to_bytevec(v));
 			assert!(k.len() > 0 && t.len() > 0);
-			self.memory.push_record((k.to_vec(), slice::strip_ref_symbols(t).to_vec(), v.to_vec()));
+			self.memory.push_record((k.into(), slice::strip_ref_symbols(t).into(), v));
 		}
 	}
 
 	pub fn store_many_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, values: &Vec<(S, S, T)>) {
 		for (k, t, v) in values {
-			let (k, t, v) = (k.as_ref().as_bytes(), t.as_ref().as_bytes(), &serialize(&v));
+			let (k, t, v) = (k.as_ref().as_bytes(), t.as_ref().as_bytes(), serialize_to_bytevec(&v));
 			assert!(k.len() > 0 && t.len() > 0);
-			self.memory.push_record((k.to_vec(), t.to_vec(), v.to_vec()));
+			self.memory.push_record((k.into(), t.into(), v));
 		}
 	}
 
@@ -165,16 +163,11 @@ impl Db {
 	}
 
 	pub fn fetch_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
-		deserialize(&self.memory[key].2)
+		deserialize(&self.memory[key].2.inner())
 	}
 
 	pub fn fetch_raw<S: AsRef<str>>(&self, key: S) -> &OwnedMemoryRecord {
 		&self.memory[key]
-	}
-
-	pub fn fetch_mut<S: AsRef<str>>(&mut self, key: S) -> OwnedRecord {
-		let (k, t, v) = &self.memory[key];
-		OwnedRecord::new(k.to_vec(), t.to_vec(), v.to_vec())
 	}
 
 	pub fn update<S: AsRef<str>, T: serde::ser::Serialize>(&mut self, k: S, v: T) {
@@ -183,13 +176,13 @@ impl Db {
 	}
 
 	pub fn update_record(&mut self, record: impl RecordRead) {
-		self.memory.delete_record(self.memory.index_of_key(record.raw_key()));
+		self.memory.delete_record(self.memory.index_of_key(record.key().as_slice()));
 		self.memory.push_record(record.to_tuple());
 	}
 
 	pub fn update_many(&mut self, records: &Vec<impl RecordRead>) {
 		for record in records {
-			self.memory.delete_record(self.memory.index_of_key(record.raw_key()));
+			self.memory.delete_record(self.memory.index_of_key(record.key().as_slice()));
 			self.memory.push_record(record.to_tuple());
 		}	
 	}
@@ -199,12 +192,12 @@ impl Db {
 	}
 
 	pub fn remove_record(&mut self, record: impl RecordRead) {
-		self.memory.delete_record(self.memory.index_of_key(record.raw_key()));
+		self.memory.delete_record(self.memory.index_of_key(record.key().as_slice()));
 	}
 
 	pub fn remove_many(&mut self, records: &Vec<impl RecordRead>) {
 		for record in records {
-			self.memory.delete_record(self.memory.index_of_key(record.raw_key()));		
+			self.memory.delete_record(self.memory.index_of_key(record.key().as_slice()));		
 		}
 	}
 
@@ -260,15 +253,12 @@ impl BytesFilter for Db {
 	}
 }
 
+
+
 impl BytesSearch for Db {
 	fn starts_with<S: AsRef<str>>(&self, key_part: S) -> Vec<Record> {
 		let k_part = key_part.as_ref().as_bytes();
 		self.memory.char_search(k_part[0]).iter().filter_map(|(k, t, v)| {
-			if k_part.len() > k.len() {
-				return None
-			}
-
-			
 			if k.starts_with(k_part) {
 				return Some(Record::new(k, t, v))
 			}
@@ -279,13 +269,8 @@ impl BytesSearch for Db {
 	}
 
 	fn ends_with<S: AsRef<str>>(&self, key_part: S) -> Vec<Record> {
-		let k_part = key_part.as_ref().as_bytes();
 		self.memory.iter().filter_map(|(k, t, v)| {
-			if k_part.len() > k.len() {
-				return None
-			}
-
-			if k.ends_with(k_part) {
+			if k.ends_with(key_part.as_ref().as_bytes()) {
 				return Some(Record::new(k, t, v))
 			}
 
@@ -295,24 +280,9 @@ impl BytesSearch for Db {
 	}
 
 	fn contains<S: AsRef<str>>(&self, key_part: S) -> Vec<Record> {
-		let k_part = key_part.as_ref().as_bytes();
 		self.memory.iter().filter_map(|(k, t, v)| {
-			if k_part.len() > k.len() {
-				return None
-			}
-
-			let mut k_part_idx = 0;
-			for b in k.iter() {
-				if k_part_idx == k_part.len() {
-					return Some(Record::new(k, t, v))
-				}
-
-				if k_part[k_part_idx] == *b {
-					k_part_idx += 1;
-				} else {
-					k_part_idx = 0;
-				}
-
+			if k.contains(key_part.as_ref()) {
+				return Some(Record::new(k, t, v))
 			}
 
 			None

@@ -3,7 +3,7 @@ macro_rules! query_deserialize (
 	($v:expr, ($($field:ident:$type:ty),+)) => {		
 		$v.iter().map(|r| {
 			let ($($field,)+) = r;
-			($(icbiadb::deserialize::<$type>($field),)+)
+			($(icbiadb::deserialize_bytevec::<$type>($field),)+)
 		}).collect::<Vec<_>>()
 	};
 );

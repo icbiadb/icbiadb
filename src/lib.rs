@@ -25,7 +25,7 @@ mod mem;
 mod fio;
 
 pub use db::Db;
-pub use utils::{serialize, deserialize};
+pub use utils::{serialize, deserialize, serialize_to_bytevec, deserialize_bytevec};
 
 
 pub fn create<S: AsRef<str>>(file_name: S) -> std::io::Result<db::Db> {

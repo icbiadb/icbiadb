@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
 use crate::parser::globals::*;
-use crate::mem::{OwnedMemoryRecord};
-use crate::utils::{Cursor, deserialize};
+use crate::mem::OwnedMemoryRecord;
+use crate::utils::deserialize;
+use crate::types::cursor::Cursor;
 
 
 pub fn seqs_find_all<'a>(v: &'a [u8], seq: &'a [u8]) -> Vec<usize> {
@@ -59,7 +60,7 @@ pub fn extract_single<'a>(v: &'a [u8], k_len: usize, t_len: usize, v_len: usize)
 	assert_eq!(&v[..3], kv::IDENT);
 	let mut cursor = Cursor::new(v);
 	cursor.jump(kv::IDENT_HEAD_BS);
-	(cursor.get(k_len).to_vec(), cursor.get(t_len).to_vec(), cursor.get(v_len).to_vec())
+	(cursor.get(k_len).into(), cursor.get(t_len).into(), cursor.get(v_len).into())
 }
 
 pub fn extract<'a>(v: &'a [u8]) -> Vec<OwnedMemoryRecord> {
