@@ -1,5 +1,6 @@
 use std::io;
 
+use icbiadb::prelude::*;
 use icbiadb::{query, query_deserialize};
 
 
@@ -24,7 +25,7 @@ fn main() -> io::Result<()> {
 
 	let articles = query!{db, "articles",
 		select title, date;
-		filter { date == "today" }
+		filter { date == "today" && title.ends_with("title") }
 	};
 
 	let articles = query_deserialize!(articles, (title: String, date: String));

@@ -10,7 +10,7 @@ use crate::{
 
 // TODO
 // Cache deserialization
-
+#[derive(Debug)]
 pub struct Record<'a> {
 	key: &'a BvString,
 	type_name: &'a BvString,
@@ -255,6 +255,27 @@ impl PartialOrd<i64> for Record<'_> {
 	}
 }
 
+impl PartialEq<i128> for Record<'_> {
+	fn eq(&self, other: &i128) -> bool {
+		self.is_uint() && self.raw_value().as_i128() == *other
+	}
+}
+
+impl PartialOrd<i128> for Record<'_> {
+	fn partial_cmp(&self, other: &i128) -> Option<std::cmp::Ordering> {
+		if !self.is_uint() { return None }
+
+		let value = self.raw_value().as_i128();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
 impl PartialEq<u16> for Record<'_> {
 	fn eq(&self, other: &u16) -> bool {
 		self.is_uint() && self.raw_value().as_u16() == *other
@@ -339,7 +360,26 @@ impl PartialOrd<usize> for Record<'_> {
 	}
 }
 
+impl PartialEq<u128> for Record<'_> {
+	fn eq(&self, other: &u128) -> bool {
+		self.is_uint() && self.raw_value().as_u128() == *other
+	}
+}
 
+impl PartialOrd<u128> for Record<'_> {
+	fn partial_cmp(&self, other: &u128) -> Option<std::cmp::Ordering> {
+		if !self.is_uint() { return None }
+
+		let value = self.raw_value().as_u128();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
 
 
 
@@ -408,6 +448,27 @@ impl PartialOrd<i64> for &Record<'_> {
 	}
 }
 
+impl PartialEq<i128> for &Record<'_> {
+	fn eq(&self, other: &i128) -> bool {
+		self.is_int() && self.raw_value().as_i128() == *other
+	}
+}
+
+impl PartialOrd<i128> for &Record<'_> {
+	fn partial_cmp(&self, other: &i128) -> Option<std::cmp::Ordering> {
+		if !self.is_int() { return None }
+
+		let value = self.raw_value().as_i128();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
 impl PartialEq<u16> for &Record<'_> {
 	fn eq(&self, other: &u16) -> bool {
 		self.is_uint() && self.raw_value().as_u16() == *other
@@ -461,6 +522,27 @@ impl PartialOrd<u64> for &Record<'_> {
 		if !self.is_uint() { return None }
 
 		let value = self.raw_value().as_u64();
+		if value > *other {
+			Some(std::cmp::Ordering::Greater)
+		} else if value < *other {
+			Some(std::cmp::Ordering::Less) 
+		} else { 
+			Some(std::cmp::Ordering::Equal)
+		}
+	}
+}
+
+impl PartialEq<u128> for &Record<'_> {
+	fn eq(&self, other: &u128) -> bool {
+		self.is_int() && self.raw_value().as_u128() == *other
+	}
+}
+
+impl PartialOrd<u128> for &Record<'_> {
+	fn partial_cmp(&self, other: &u128) -> Option<std::cmp::Ordering> {
+		if !self.is_int() { return None }
+
+		let value = self.raw_value().as_u128();
 		if value > *other {
 			Some(std::cmp::Ordering::Greater)
 		} else if value < *other {
