@@ -32,22 +32,24 @@ impl<'a> Record<'a> {
 
 	pub fn is_int(&self) -> bool {
 		match self.type_name().as_slice() {
-			// i8-i64
+			// i8-i128
 			[105, 56] => true,
 			[105, 49, 54] => true,
 			[105, 51, 50] => true,
 			[105, 54, 52] => true,
+			[105, 49, 50, 56] => true,
 			_ => false
 		}
 	}
 
 	pub fn is_uint(&self) -> bool {
 		match self.type_name().as_slice() {
-			// u8-u64
+			// u8-u128
 			[117, 56] => true,
 			[117, 49, 54] => true,
 			[117, 51, 50] => true,
 			[117, 54, 52] => true,
+			[117, 49, 50, 56] => true,
 			_ => false
 		}
 	}
