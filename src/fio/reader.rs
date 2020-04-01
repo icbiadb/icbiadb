@@ -30,6 +30,7 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 
 	pub fn read_to(&mut self, memory: &mut Memory) -> std::io::Result<()> {
 		// TODO, move data initialization for memory upward in the function call stack
+		#[cfg(test)]
 		let time = std::time::Instant::now();
 
 		let header = match self.read_header() {
@@ -43,6 +44,7 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 				return Ok(())
 			}
 		};
+		#[cfg(test)]
 		debug!("{:?}", header);
 
 		// TODO
@@ -87,6 +89,7 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 		};
 
 
+		#[cfg(test)]
 		debug!("Loaded {} Declarations, {} KV records, {} Declared records in {:?}",
 			declarations.len(), 
 			kv_records.len(), 
@@ -113,6 +116,7 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 	pub fn read_declarations(&mut self, len: u32) -> std::io::Result<(HashMap<Vec<u8>, (u64, u64, u64)>, DeclarationMap)> {
 		let mut dbuf = vec![0u8; len as usize];
 		self.reader.read_exact(&mut dbuf).expect("[Reading declarations]");
+		#[cfg(test)]
 		debug!("[Reading declarations] Read {}/{}", dbuf.len(), len);
 		Ok(parser::decl::extract_decls(&dbuf))
 	}
@@ -120,6 +124,7 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 	pub fn read_kv_records(&mut self, len: u64) -> std::io::Result<Vec<OwnedMemoryRecord>> {
 		let mut dbuf = vec![0u8; len as usize];
 		self.reader.read_exact(&mut dbuf)?;
+		#[cfg(test)]
 		debug!("[Reading kv records] Read {}/{}", dbuf.len(), len);
 		Ok(parser::kv::extract(&dbuf))
 	}
@@ -127,6 +132,7 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 	pub fn read_decl_records(&mut self, len: u64) -> std::io::Result<Vec<DeclarationRecord>> {
 		let mut dbuf = vec![0u8; len as usize];
 		self.reader.read_exact(&mut dbuf).expect("[Reading Decl records]");
+		#[cfg(test)]
 		debug!("[Reading decl records] Read {}/{}", dbuf.len(), len);
 		Ok(parser::decl::records::extract(&dbuf))
 	}

@@ -1,6 +1,7 @@
 #![allow(bare_trait_objects, unused_macros)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(test)]
 #[macro_use] extern crate log;
 #[cfg(feature = "alloc")]
 extern crate alloc;
