@@ -64,14 +64,12 @@ macro_rules! query {
 		$(
 			let row = vec![$((stringify!($key).as_bytes().to_vec(), icbiadb::serialize_to_bytevec(&$val))),+].iter().cloned()
 				.collect::<std::collections::HashMap<_, _>>();
-			$db.memory_mut().decl_insert_row($name, icbiadb::decl::types::DeclarationRecord::from_hashmap(row));
+			$db.decl_insert_row($name, icbiadb::decl::types::DeclarationRecord::from_hashmap(row));
 		)+
 	};
 
-	($db:expr, $name:literal, insert many $v:expr) => {
-		$(
-			$db.memory_mut().decl_insert_many($name, v);
-		)+
+	($db:expr, $name:literal, insert_many $v:expr) => {
+		$db.decl_insert_many($name, $v);
 	};
 }
 

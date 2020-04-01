@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Serialize, Deserialize};
 
-use crate::utils::{serialize, deserialize, serialize_to_bytevec, normalize_type_name};
+use crate::utils::{serialize, serialize_to_bytevec, normalize_type_name};
 use crate::types::bv::ByteVec;
 use crate::db::Db;
 
