@@ -25,6 +25,7 @@ mod mem;
 mod fio;
 
 pub use db::Db;
+pub use decl::types::DeclarationRecord;
 pub use utils::{serialize, deserialize, serialize_to_bytevec, deserialize_bytevec};
 
 

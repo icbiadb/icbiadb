@@ -62,12 +62,29 @@ pub type DeclarationMap = HashMap<Vec<u8>, FieldMap>;
 pub struct DeclarationRecord(HashMap<Vec<u8>, ByteVec>);
 
 impl DeclarationRecord {
-	pub fn new(hm: HashMap<Vec<u8>, ByteVec>) -> Self {
+	pub fn new() -> Self {
+		DeclarationRecord(HashMap::new())
+	}
+
+	pub fn from_vec<S: AsRef<str>, T: Sized + serde::ser::Serialize>(v: Vec<(Vec<u8>, ByteVec)>) -> Self {
+		DeclarationRecord::from_hashmap(v.iter().cloned()
+			.filter_map(|(field, value)| {
+				Some((field, value))
+			})
+			.collect::<HashMap<_, _>>()
+		)
+	}
+
+	pub fn from_hashmap(hm: HashMap<Vec<u8>, ByteVec>) -> Self {
 		DeclarationRecord(hm)
 	}
 
 	pub fn with_capacity(cap: usize) -> Self {
 		DeclarationRecord(HashMap::with_capacity(cap))
+	}
+
+	pub fn insert<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, field: S, value: T) {
+		self.0.insert(field.as_ref().as_bytes().to_vec(), serialize_to_bytevec(&value));
 	}
 }
 
@@ -154,54 +171,7 @@ impl Declare {
 }
 
 
-/// Used by QueryBuilder
-#[derive(Clone)]
-pub struct DeclRecordValue<'a>(&'a ByteVec);
-
-impl<'a> DeclRecordValue<'a> {
-	pub fn deser<T: serde::Deserialize<'a>>(&self) -> T {
-		deserialize(self.0.inner())
-	}
-}
-
-impl std::cmp::Eq for DeclRecordValue<'_> {}
-
-
-impl PartialEq<&str> for DeclRecordValue<'_> {
-    fn eq(&self, other: &&str) -> bool {
-        self.0.inner().as_slice() == other.as_bytes()
-    }
-}
-
-impl PartialEq for DeclRecordValue<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        self.0.inner() == other.0.inner()
-    }
-}
-
-
-
-
-pub struct BorrowedDeclRecord<'a> {
-	inner: HashMap<&'a str, DeclRecordValue<'a>>,
-}
-
-impl<'a> BorrowedDeclRecord<'a> {
-	pub fn new(v: Vec<(&'a str, DeclRecordValue<'a>)>) -> Self {
-		BorrowedDeclRecord {
-			inner: v.iter().cloned().collect()
-		}
-	}
-}
-
-impl<'a> std::ops::Deref for BorrowedDeclRecord<'a> {
-	type Target = HashMap<&'a str, DeclRecordValue<'a>>;
-
-	fn deref(&self) -> &Self::Target {
-		&self.inner
-	}
-}
-
+// Used by macro query!
 pub struct QueryResult<'a, T> {
 	field_map: &'a FieldMap,
 	records: Vec<T>,
@@ -232,7 +202,7 @@ pub struct QueryBuilder<'a> {
 	field_map: &'a FieldMap,
 	records: &'a Vec<DeclarationRecord>,
 	select_fields: Vec<&'a str>,
-	filter: Option<Box<Fn(&BorrowedDeclRecord) -> bool>>
+	filter: Option<Box<Fn(&HashMap<&str, &ByteVec>) -> bool>>
 }
 
 impl<'a> QueryBuilder<'a> {
@@ -258,23 +228,26 @@ impl<'a> QueryBuilder<'a> {
 		self
 	}
 
-	pub fn filter<F>(& mut self, cb: F) -> &mut Self where F: 'static + Fn(&BorrowedDeclRecord) -> bool {
+	pub fn filter<F>(& mut self, cb: F) -> &mut Self where F: 'static + Fn(&HashMap<&str, &ByteVec>) -> bool {
 		self.filter = Some(Box::new(cb));
 		self
 	}
 
-	pub fn collect(&self) -> Vec<BorrowedDeclRecord> {
+	pub fn collect(&self) -> Vec<HashMap<&str, &ByteVec>> {
 		self.records.iter().filter_map(|r| {
-			let v = self.select_fields.iter().cloned()
-				.filter_map(|field| { Some((field, DeclRecordValue(&r[field.as_bytes()]))) })
-				.collect();
+			let select_fields = self.select_fields.iter().cloned()
+				.filter_map(|field| { Some((field, &r[field.as_bytes()])) })
+				.collect::<HashMap<_, _>>();
 
-			let mt = BorrowedDeclRecord::new(v);
-			if self.filter.as_ref().unwrap()(&mt) {
-				return Some(mt)
+			if self.filter.is_some() {
+				if self.filter.as_ref().unwrap()(&select_fields) {
+					return Some(select_fields)
+				}
+
+				return None
+			} else {
+				return Some(select_fields)
 			}
-
-			None
 		})
 		.collect()
 	}

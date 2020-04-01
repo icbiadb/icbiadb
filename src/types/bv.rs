@@ -1,6 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 use crate::prelude::{BvContains, BvStartsWith, BvEndsWith};
+use crate::utils::serialize_to_bytevec;
 use crate::slice::*;
 
 
@@ -14,7 +15,8 @@ pub struct ByteVec(Vec<u8>);
 
 impl ByteVec {
 	pub fn new() -> Self { ByteVec(Vec::new()) }
-	pub fn from(v: Vec<u8>) -> Self { ByteVec(v) }
+	pub fn from_obj<T: Sized + serde::ser::Serialize>(o: T) -> Self { serialize_to_bytevec(&o) }
+	pub fn from_vec(v: Vec<u8>) -> Self { ByteVec(v) }
 	pub fn inner(&self) -> &Vec<u8> { &self.0 }
 
 	pub fn to_vec(&self) -> Vec<u8> {

@@ -124,6 +124,11 @@ impl Memory {
 			.and_modify(|v| v.push(record));
 	}
 
+	pub fn decl_insert_rows(&mut self, name: &str, rows: Vec<DeclarationRecord>) {
+		self.decl_records.entry(name.as_bytes().to_vec())
+			.and_modify(|v| v.extend(rows));
+	}
+
 	pub fn get_field_map<S: AsRef<str>>(&self, name: S) -> &FieldMap {
 		&self.decl_map[name.as_ref().as_bytes()]
 	}

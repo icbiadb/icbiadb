@@ -234,6 +234,14 @@ impl Db {
 		self.memory.remove_decl(name);
 	}
 
+	pub fn decl_insert_row<S: AsRef<str>>(&mut self, name: S, row: DeclarationRecord) {
+		self.memory.decl_insert_row(name.as_ref(), row);
+	}
+
+	pub fn decl_insert_many<S: AsRef<str>>(&mut self, name: S, rows: Vec<DeclarationRecord>) {
+		self.memory.decl_insert_rows(name.as_ref(), rows);
+	}
+
 	pub fn query<S: AsRef<str>>(&self, name: S) -> QueryBuilder {
 		let field_map = self.memory.get_field_map(&name);
 		let records = self.memory.get_decl_records(&name);
