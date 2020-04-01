@@ -16,22 +16,15 @@ fn main() -> io::Result<()> {
 		insert (title="A short title", date="yesterday")
 	};
 
-	// Or with objects, do note there are no boundary-checks at all atm
-	let mut my_record = icbiadb::DeclarationRecord::new();
-	my_record.insert("title", "A short title");
-	my_record.insert("date", "today");
-	db.decl_insert_row("articles", my_record);
-
-	// Multiple rows
 	let mut my_records = Vec::new();
-	for x in 0..10 {
+	for _x in 0..10 {
 		let mut record = icbiadb::DeclarationRecord::new();
 		record.insert("title", "A short title");
 		record.insert("date", "today");
 		my_records.push(record);
 	}
-	db.decl_insert_many("articles", my_records);
-
+	
+	query!{db, "articles", insert_many my_records};
 
 	let articles = query!{db, "articles",
 		select title, date;
@@ -42,6 +35,29 @@ fn main() -> io::Result<()> {
 	println!("{:?}", articles);
 
 
+
+	// Or with objects, do note there are no boundary-checks at all for neither atm
+	let mut my_record = icbiadb::DeclarationRecord::new();
+	my_record.insert("title", "A short title");
+	my_record.insert("date", "today");
+	db.decl_insert_row("articles", my_record);
+
+	let mut my_records = Vec::new();
+	for _x in 0..10 {
+		let mut record = icbiadb::DeclarationRecord::new();
+		record.insert("title", "A short title");
+		record.insert("date", "today");
+		my_records.push(record);
+	}
+	db.decl_insert_many("articles", my_records);
+
+	let mut query = db.query("articles");
+	let _result = query
+		.select(vec!["title", "date"])
+		.filter(|record| {
+			record["date"] == "today" || record["date"] == "yesterday"
+		})
+		.collect();
 
 	Ok(())
 }
