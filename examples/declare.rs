@@ -1,22 +1,15 @@
 use std::io;
 
 use icbiadb::prelude::*;
-use icbiadb::{query, query_deserialize};
+use icbiadb::{if_not_exists_declare, query, query_deserialize};
 
 
 fn main() -> io::Result<()> {
 	let mut db = icbiadb::mem()?;
 
-	if !db.has_decl("articles") {
-		let mut articles = db.declare("articles");
-
-		articles
-			.add_field::<str>("title")
-				.option("unique", true)
-			.add_field::<str>("date");
-
-		db.insert_decl(&articles);
-	}
+	if_not_exists_declare!{db, "articles",
+		(title: String[unique], date: String)
+	};
 
 	query!{db, "articles",
 		insert (title="A short title", date="today"),

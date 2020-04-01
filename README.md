@@ -30,16 +30,9 @@ Screw that! In IcbiaDB, you define the nature of the structure on the spot with 
 
 
 ```rust
-if !db.has_decl("articles") {
-	let mut articles = db.declare("articles");
-
-	articles
-		.add_field::<str>("title")
-			.option("unique", true)
-		.add_field::<str>("date");
-
-	db.insert_decl(&articles);
-}
+if_not_exists_declare!{db, "articles",
+	(title: String [unique not_null], date: String)	
+};
 
 query!{db, "articles",
 	insert (title="A short title", date="today"),
