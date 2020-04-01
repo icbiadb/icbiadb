@@ -8,7 +8,7 @@
 
 * Added if_not_exists_declare! macro
 * Changed DeclarationRecord, easier to construct and insert without macro, see example
-* Added query!{ insert_many declaration Vec<DeclarationRecord> }
+* Added query!{ insert_many Vec\<DeclarationRecord\> }
 * Added Db.decl_insert_row(DeclarationRecord) and decl_insert_many(Vec<DeclarationRecord>)
 * Removed BorrowedDeclRecord & DeclValue
 * Db.query.select.filter now uses a HashMap<&str, &ByteVec>, <field name, value> for closure parameter(i.e, able to use ByteVecs int & str comparisons)
