@@ -11,7 +11,7 @@ macro_rules! query_deserialize (
 #[macro_export]
 macro_rules! if_not_exists_declare {
 	($db:expr, $name:literal, ($($key:ident:$type:ty $([$($opt:ident) +])?),+)) => {
-		if $db.has_decl($name) {
+		if !$db.has_decl($name) {
 			let mut decl = $db.declare($name);
 			decl
 			$(
