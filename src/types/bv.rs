@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 use crate::prelude::{BvContains, BvStartsWith, BvEndsWith};
-use crate::utils::serialize_to_bytevec;
+use crate::utils::{serialize_to_bytevec, deserialize_bytevec};
 use crate::slice::*;
 
 
@@ -29,6 +29,10 @@ impl ByteVec {
 
 	pub fn iter(&self) -> std::slice::Iter<u8> {
 		self.0.iter()
+	}
+
+	pub fn extract<T: ?Sized + serde::de::DeserializeOwned>(&self) -> T {
+		deserialize_bytevec(&self)
 	}
 
 	pub fn as_str(&self) -> &str {
