@@ -3,7 +3,7 @@
 
 
 
-### 0.2.1 2020-04-
+### 0.2.1 2020-04-2
 
 
 * BvObject cmp::PartialEq<&[u8]>, remove str len from self if is_str else compare whole slice
