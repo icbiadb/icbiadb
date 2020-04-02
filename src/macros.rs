@@ -70,7 +70,7 @@ macro_rules! query {
 	}};
 
 	($db:expr, $name:literal, insert_many $v:expr) => {
-		$db.decl_insert_many($name, $v);
+		$db.decl_insert_many($name, $v).unwrap();
 	};
 }
 
