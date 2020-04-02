@@ -281,8 +281,16 @@ impl Db {
 		Ok(())
 	}
 
-	pub fn decl_insert_many<S: AsRef<str>>(&mut self, name: S, rows: Vec<DeclarationRecord>) {
-		self.memory.decl_insert_rows(name.as_ref(), rows);
+	pub fn decl_insert_many<S: AsRef<str>>(&mut self, name: S, mut rows: Vec<DeclarationRecord>) -> Result<(), String> {
+		for row in rows.drain(0..rows.len()) {
+			self.decl_insert_row(&name, row)?
+		}
+
+		Ok(())
+
+		// TODO
+		// Boundary check(unique) within rows and stored rows and extend
+		//self.memory.decl_insert_rows(name.as_ref(), rows);
 	}
 
 	pub fn query<S: AsRef<str>>(&self, name: S) -> QueryBuilder {
