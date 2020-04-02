@@ -24,8 +24,6 @@
 
 * Macro for defining a new declaration
 * [query] insert_many (Vec<HashMap> & Vec<()>)
-* [query] insert (HashMap & Vec<()>)
-* [query] allow multiple filters
 * [query] Implement order_by, group_by?
 * [query_deserialize] change params to only take type instead of $field:ident:$t:ty(ident used for tuple deconstruct atm, alternatives?)
 
@@ -37,10 +35,8 @@
 
 **Declarations**
 
-* Validate and check declarations field-rules for mem::decl_insert_row
 * Impl update
-* Type check/validation for field options in field_map
-* Column options(Primary Key, Not null, Foreign key?, Unique)
+* Column options(Primary Key, Foreign key?, Unique)
 
 * Byte slices helper functions
 ..* Strip
