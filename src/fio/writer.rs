@@ -52,23 +52,23 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		// Decl records
 		let mut decl_records_length = 0;
 		for (name, records) in memory.decl_records() {
-			let mut decl_lu_name = Vec::with_capacity(name.len() + "decl_records_start".as_bytes().len());
-			decl_lu_name.extend(name);
-			decl_lu_name.extend("decl_records_start".as_bytes());
-			self.decl_lu_map.insert(decl_lu_name, self.curr_pos as u64);
-
 			if records.len() > 0 {
-				decl_records_length += self.write_decl_header()?;
-				for record in records {
-					decl_records_length += self.write_decl_record(record)?;
-				}
-				self.curr_pos += decl_records_length as usize;
-				self.decl_records_length += decl_records_length;
-			}
+				let mut decl_lu_name = Vec::with_capacity(name.len() + "decl_records_start".as_bytes().len());
+				decl_lu_name.extend(name);
+				decl_lu_name.extend("decl_records_start".as_bytes());
+				self.decl_lu_map.insert(decl_lu_name, self.curr_pos as u64);
 
-			self.write_declaration_records_data(name, decl_records_length, records.len() as u64)?;
-			self.writer.seek(SeekFrom::End(0))?;
-			decl_records_length = 0;
+					decl_records_length += self.write_decl_header()?;
+					for record in records {
+						decl_records_length += self.write_decl_record(record)?;
+					}
+					self.curr_pos += decl_records_length as usize;
+					self.decl_records_length += decl_records_length;
+
+				self.write_declaration_records_data(name, decl_records_length, records.len() as u64)?;
+				self.writer.seek(SeekFrom::End(0))?;
+				decl_records_length = 0;
+			}
 		}
 
 		self.write_header()?;

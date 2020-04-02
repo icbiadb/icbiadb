@@ -241,7 +241,9 @@ impl PartialEq<&BvObject> for BvObject {
 
 impl PartialEq<[u8]> for BvObject {
 	fn eq(&self, other: &[u8]) -> bool {
-		self.is_str() && self.raw == other
+		return if self.is_str() {
+			&self.raw[8..] == other
+		} else { self.raw == other }
 	}
 }
 
@@ -253,6 +255,12 @@ impl PartialEq<str> for BvObject {
 
 impl PartialEq<String> for BvObject {
 	fn eq(&self, other: &String) -> bool {
+		self.is_str() && &self.raw[8..] == other.as_bytes()
+	}
+}
+
+impl PartialEq<&String> for BvObject {
+	fn eq(&self, other: &&String) -> bool {
 		self.is_str() && &self.raw[8..] == other.as_bytes()
 	}
 }
