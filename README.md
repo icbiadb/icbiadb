@@ -85,13 +85,12 @@ struct Article {
 	text: String,
 }
 
-
 fn main() -> std::io::Result<()> {
 	let mut db = icbiadb::mem()?;
 	
 	db.store("key:welcome", "Hello World!");
-	let record = db.fetch("key:welcome");
-	println!("{} stores {:?} of type {}", record.key(), record.value::<String>(), record.type_name());
+	let v = db.fetch("key:welcome");
+	println!("{:?} of type {}", v.extract::<String>(), v.type_name());
 
 	db.update("key:welcome", 100);
 	println!("{}", db.fetch_value::<i32>("key:welcome"));
@@ -104,10 +103,10 @@ fn main() -> std::io::Result<()> {
 	let keys = db.starts_with("key:");
 
 	// Seamless string bytes comparison, integers are atm converted natively(from_le_bytes)
-	let articles = db.filter(|record| {
-		record.type_name() == "IcbiaDB_tests::Article"
-		|| record.contains("this is a string")
-		|| (record > 100.0 && record < 200.0) && record.key().starts_with("calculations:")
+	let articles = db.filter(|(k, v)| {
+		v.type_name() == "IcbiaDB_tests::Article"
+		|| v.contains("this is a string")
+		|| (v > 100.0 && v < 200.0) && k.starts_with("calculations:")
 	});
 
 	println!("Found {} keys starting with \"key:\"", keys.len());
