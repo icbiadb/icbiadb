@@ -2,6 +2,19 @@
 
 
 
+
+### 0.2.1 2020-04-
+
+
+* BvObject cmp::PartialEq<&[u8]>, remove str len from self if is_str else compare whole slice
+* Fixed crash when reading a db-file with only declarations, fio/writer wrote decl::records::IDENT even if there weren't any records, adding written length to decl_records_len in the header making the reader try to parse decl records
+
+
+### 0.2.0 2020-04-02
+
+* Bump version, crates.io didn't sort 0.1.3 as latest when 0.1.21 existed
+
+
 ### 0.1.3, 2020-04-02
 
 
