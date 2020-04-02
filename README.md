@@ -124,7 +124,7 @@ fn main() -> std::io::Result<()> {
 
 No real bench marks yet, but as an example, searching and filtering 4 million KV records and half a million decl records on an Asus E402S, Intel Dual-Core N3060, 2gb ram, single thread
 
-
+Data set: ~3 million i64s, ~1million Article { short str, short str }
 ```
 [2020-03-26T16:05:48Z DEBUG icbiadb::fio::reader] Loaded 0 Declarations, 4000000 KV records, 0 Declared records in 2.797347558s
 [2020-03-26T16:05:51Z INFO  IcbiaDB_tests] starts_with "test:", found 999999 db: 140.30478ms
@@ -133,6 +133,7 @@ No real bench marks yet, but as an example, searching and filtering 4 million KV
 [2020-03-26T16:05:52Z INFO  IcbiaDB_tests] Filter: r.raw_type_name() == "IcbiaDB_tests::Article".as_bytes(): 1000000 items in 181.358364ms
 ```
 
+Data set: 500000 title: short str, text: first paragraph of "lorem ipsum"
 ```
 [2020-03-28T19:02:23Z DEBUG icbiadb::fio::reader] Loaded 1 Declarations, 0 KV records, 500000 Declared records in 4.08070582s
 [2020-03-28T19:02:24Z INFO  IcbiaDB_tests] Filtered { title == "A shorter title" }: 250000 records in 193.428521ms
