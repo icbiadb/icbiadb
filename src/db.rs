@@ -1,10 +1,9 @@
-use crate::utils::{deserialize, serialize_to_bytevec, normalize_type_name};
+use crate::utils::{serialize, serialize_object, normalize_type_name};
 use crate::decl::types::*;
 use crate::prelude::*;
 use crate::mem::{Memory, OwnedMemoryRecord};
 use crate::fio::FileIO;
-use crate::slice;
-use crate::types::record::Record;
+use crate::types::bv::{BvString, BvObject};
 
 
 enum DbType {
@@ -124,46 +123,52 @@ impl Db {
 	}
 
 	pub fn store<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
-		let (k, t, ser_v) = (k.as_ref().as_bytes(), normalize_type_name(std::any::type_name::<T>().as_bytes()), serialize_to_bytevec(&v));
-		assert!(k.len() > 0 && t.len() > 0);
-		self.memory.push_record((k.into(), t.into(), ser_v));
+		let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
+		assert!(k.len() > 0 && v.type_name().len() > 0);
+		self.memory.push_record((k.into(), v.into()));
 	}
 
 	pub fn store_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, t: S, v: T) {
-		let (k, t, v) = (k.as_ref().as_bytes(), normalize_type_name(t.as_ref().as_bytes()), serialize_to_bytevec(&v));
-		assert!(k.len() > 0 && t.len() > 0);
-		self.memory.push_record((k.into(), t.into(), v));
+		let (k, v) = (
+			k.as_ref().as_bytes(), 
+			BvObject::from_raw(normalize_type_name(t.as_ref().as_bytes()).to_vec(), serialize(&v))
+		);
+
+		assert!(k.len() > 0 && v.type_name().len() > 0);
+		self.memory.push_record((k.into(), v));
 	}
 
-	pub fn store_raw<S: AsRef<str>>(&mut self, k: S, t: S, v: &[u8]) {	
-		let (k, t, v) = (k.as_ref().as_bytes(), normalize_type_name(t.as_ref().as_bytes()), v);
-		assert!(k.len() > 0 && t.len() > 0);
-		self.memory.push_record((k.into(), t.into(), v.into()));
+	pub fn store_raw<S: AsRef<str>>(&mut self, k: S, t: S, v: Vec<u8>) {	
+		let (k, v) = (k.as_ref().as_bytes(), BvObject::from_raw(normalize_type_name(t.as_ref().as_bytes()).to_vec(), v));
+		assert!(k.len() > 0 && v.type_name().len() > 0);
+		self.memory.push_record((k.into(), v));
 	}
 
 	pub fn store_many<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, values: &Vec<(S, T)>) {
 		for (k, v) in values {
-			let (k, t, v) = (k.as_ref().as_bytes(), std::any::type_name::<T>().as_bytes(), serialize_to_bytevec(v));
-			assert!(k.len() > 0 && t.len() > 0);
-			self.memory.push_record((k.into(), slice::strip_ref_symbols(t).into(), v));
+			let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
+			assert!(k.len() > 0 && v.type_name().len() > 0);
+			self.memory.push_record((k.into(), v));
 		}
 	}
 
 	pub fn store_many_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, values: &Vec<(S, S, T)>) {
 		for (k, t, v) in values {
-			let (k, t, v) = (k.as_ref().as_bytes(), t.as_ref().as_bytes(), serialize_to_bytevec(&v));
-			assert!(k.len() > 0 && t.len() > 0);
-			self.memory.push_record((k.into(), t.into(), v));
+			let (k, v) = (
+				k.as_ref().as_bytes(), 
+				BvObject::from_raw(normalize_type_name(t.as_ref().as_bytes()).to_vec(), serialize(&v))
+			);
+			assert!(k.len() > 0 && v.type_name().len() > 0);
+			self.memory.push_record((k.into(), v));
 		}
 	}
 
-	pub fn fetch<S: AsRef<str>>(&self, key: S) -> Record {
-		let (k, t, v) = &self.memory[key];
-		Record::new(k, t, v)
+	pub fn fetch<S: AsRef<str>>(&self, key: S) -> &BvObject {
+		&self.memory[key].1
 	}
 
 	pub fn fetch_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
-		deserialize(&self.memory[key].2.inner())
+		self.memory[key].1.extract()
 	}
 
 	pub fn fetch_raw<S: AsRef<str>>(&self, key: S) -> &OwnedMemoryRecord {
@@ -234,8 +239,46 @@ impl Db {
 		self.memory.remove_decl(name);
 	}
 
-	pub fn decl_insert_row<S: AsRef<str>>(&mut self, name: S, row: DeclarationRecord) {
+	pub fn decl_get_field_map<S: AsRef<str>>(&self, name: S) -> &FieldMap {
+		self.memory.get_field_map(name.as_ref().as_bytes())
+	}
+
+	pub fn get_decl_records<S: AsRef<str>>(&self, name: S) -> &Vec<DeclarationRecord> {
+		self.memory.get_decl_records(name.as_ref().as_bytes())
+	}
+
+	pub fn decl_insert_row<S: AsRef<str>>(&mut self, name: S, row: DeclarationRecord) -> Result<(), String> {
+		let field_map = self.memory.get_field_map(&name.as_ref().as_bytes());
+		let records = self.memory.get_decl_records(name.as_ref().as_bytes());
+		let mut unique_values = std::collections::HashMap::new();
+		let unique_fields: Vec<Vec<u8>> = field_map.iter()
+			.filter_map(|(k, v)| {
+				if v.contains_key("unique".as_bytes()) {
+					return Some(k.to_vec())
+				} else { None }
+			})
+			.collect();
+
+		for (k, v) in field_map.iter() {
+			if v["type".as_bytes()] != row[k].type_name() {
+				return Err(format!("Expected type \"{}\" found type \"{}\"", v["type".as_bytes()].as_str(), row[k].type_name()));
+			}
+
+			if v.contains_key("unique".as_bytes()) {
+				unique_values.insert(k.to_vec(), &row[k]);
+			}
+		}
+
+		for srow in records.iter() {
+			for unique_field in unique_fields.iter() {
+				if srow[unique_field.as_slice()] == unique_values[unique_field.as_slice()] {
+					return Err(format!("\"{}\" collided", std::str::from_utf8(unique_field).unwrap()));
+				}
+			}
+		}
+
 		self.memory.decl_insert_row(name.as_ref(), row);
+		Ok(())
 	}
 
 	pub fn decl_insert_many<S: AsRef<str>>(&mut self, name: S, rows: Vec<DeclarationRecord>) {
@@ -243,17 +286,16 @@ impl Db {
 	}
 
 	pub fn query<S: AsRef<str>>(&self, name: S) -> QueryBuilder {
-		let field_map = self.memory.get_field_map(&name);
-		let records = self.memory.get_decl_records(&name);
+		let field_map = self.memory.get_field_map(name.as_ref().as_bytes());
+		let records = self.memory.get_decl_records(name.as_ref().as_bytes());
 		QueryBuilder::new(field_map, records)
 	}
 }
 
 impl BytesFilter for Db {
-	fn filter<F>(&self, cb: F) -> Vec<Record> where F: Fn(&Record) -> bool {
+	fn filter<F>(&self, cb: F) -> Vec<&(BvString, BvObject)> where F: Fn(&(BvString, BvObject)) -> bool {
 		self.memory.iter()
 			.filter_map(|r| {
-				let r: Record = r.into();
 				if cb(&r) { return Some(r) } 
 				None
 			})
@@ -264,11 +306,11 @@ impl BytesFilter for Db {
 
 
 impl BytesSearch for Db {
-	fn starts_with<S: AsRef<str>>(&self, key_part: S) -> Vec<Record> {
+	fn starts_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(&BvString, &BvObject)> {
 		let k_part = key_part.as_ref().as_bytes();
-		self.memory.char_search(k_part[0]).iter().filter_map(|(k, t, v)| {
+		self.memory.char_search(k_part[0]).iter().filter_map(|(k, v)| {
 			if k.starts_with(k_part) {
-				return Some(Record::new(k, t, v))
+				return Some((k, v))
 			}
 
 			None
@@ -276,10 +318,10 @@ impl BytesSearch for Db {
 		.collect::<Vec<_>>()
 	}
 
-	fn ends_with<S: AsRef<str>>(&self, key_part: S) -> Vec<Record> {
-		self.memory.iter().filter_map(|(k, t, v)| {
+	fn ends_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(&BvString, &BvObject)> {
+		self.memory.iter().filter_map(|(k, v)| {
 			if k.ends_with(key_part.as_ref().as_bytes()) {
-				return Some(Record::new(k, t, v))
+				return Some((k, v))
 			}
 
 			None
@@ -287,10 +329,10 @@ impl BytesSearch for Db {
 		.collect::<Vec<_>>()
 	}
 
-	fn contains<S: AsRef<str>>(&self, key_part: S) -> Vec<Record> {
-		self.memory.iter().filter_map(|(k, t, v)| {
+	fn contains<S: AsRef<str>>(&self, key_part: S) -> Vec<(&BvString, &BvObject)> {
+		self.memory.iter().filter_map(|(k, v)| {
 			if k.contains(key_part.as_ref()) {
-				return Some(Record::new(k, t, v))
+				return Some((k, v))
 			}
 
 			None

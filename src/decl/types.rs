@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use serde::{Serialize, Deserialize};
 
-use crate::utils::{serialize, serialize_to_bytevec, normalize_type_name};
-use crate::types::bv::ByteVec;
+use crate::utils::{serialize, serialize_object, serialize_to_bytevec, normalize_type_name};
+use crate::types::bv::{ByteVec, BvObject};
 use crate::db::Db;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -35,7 +35,7 @@ impl std::fmt::Display for FieldMap {
 			.map(|(k, v)| {
 				(k,
 				v.iter()
-					.map(|(k ,v)| (k, std::str::from_utf8(v.inner()).unwrap()))
+					.map(|(k ,v)| (k, v.as_str()))
 					.collect::<Vec<_>>()
 				)
 			})
@@ -59,14 +59,14 @@ pub type DeclarationMap = HashMap<Vec<u8>, FieldMap>;
 ///
 /// HashMap<Field Name, Field data>
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DeclarationRecord(HashMap<Vec<u8>, ByteVec>);
+pub struct DeclarationRecord(HashMap<Vec<u8>, BvObject>);
 
 impl DeclarationRecord {
 	pub fn new() -> Self {
 		DeclarationRecord(HashMap::new())
 	}
 
-	pub fn from_vec<S: AsRef<str>, T: Sized + serde::ser::Serialize>(v: Vec<(Vec<u8>, ByteVec)>) -> Self {
+	pub fn from_vec<S: AsRef<str>, T: Sized + serde::ser::Serialize>(v: Vec<(Vec<u8>, BvObject)>) -> Self {
 		DeclarationRecord::from_hashmap(v.iter().cloned()
 			.filter_map(|(field, value)| {
 				Some((field, value))
@@ -75,7 +75,7 @@ impl DeclarationRecord {
 		)
 	}
 
-	pub fn from_hashmap(hm: HashMap<Vec<u8>, ByteVec>) -> Self {
+	pub fn from_hashmap(hm: HashMap<Vec<u8>, BvObject>) -> Self {
 		DeclarationRecord(hm)
 	}
 
@@ -84,12 +84,12 @@ impl DeclarationRecord {
 	}
 
 	pub fn insert<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, field: S, value: T) {
-		self.0.insert(field.as_ref().as_bytes().to_vec(), serialize_to_bytevec(&value));
+		self.0.insert(field.as_ref().as_bytes().to_vec(), serialize_object(&value));
 	}
 }
 
 impl std::ops::Deref for DeclarationRecord {
-	type Target = HashMap<Vec<u8>, ByteVec>;
+	type Target = HashMap<Vec<u8>, BvObject>;
 
 	fn deref(&self) -> &Self::Target {
 		&self.0
@@ -202,7 +202,7 @@ pub struct QueryBuilder<'a> {
 	field_map: &'a FieldMap,
 	records: &'a Vec<DeclarationRecord>,
 	select_fields: Vec<&'a str>,
-	filter: Option<Box<Fn(&HashMap<&str, &ByteVec>) -> bool>>
+	filter: Option<Box<Fn(&HashMap<&str, &BvObject>) -> bool>>
 }
 
 impl<'a> QueryBuilder<'a> {
@@ -228,12 +228,12 @@ impl<'a> QueryBuilder<'a> {
 		self
 	}
 
-	pub fn filter<F>(& mut self, cb: F) -> &mut Self where F: 'static + Fn(&HashMap<&str, &ByteVec>) -> bool {
+	pub fn filter<F>(& mut self, cb: F) -> &mut Self where F: 'static + Fn(&HashMap<&str, &BvObject>) -> bool {
 		self.filter = Some(Box::new(cb));
 		self
 	}
 
-	pub fn collect(&self) -> Vec<HashMap<&str, &ByteVec>> {
+	pub fn collect(&self) -> Vec<HashMap<&str, &BvObject>> {
 		self.records.iter().filter_map(|r| {
 			let select_fields = self.select_fields.iter().cloned()
 				.filter_map(|field| { Some((field, &r[field.as_bytes()])) })

@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use crate::decl::types::*;
-use crate::types::bv::{BvString, ByteVec};
+use crate::types::bv::{BvString, BvObject};
 
 
 /// Stores byte data of key, type_name and value
-pub type OwnedMemoryRecord = (BvString, BvString, ByteVec);
+pub type OwnedMemoryRecord = (BvString, BvObject);
 
 
 pub struct Memory {
@@ -48,7 +48,7 @@ impl Memory {
 		let mut lu_map_exact = HashMap::with_capacity(self.kv_records.len());
 		let mut lu_map_first = HashMap::with_capacity(self.kv_records.len());
 
-		for (i, (k, _, _)) in self.kv_records.iter().enumerate() {
+		for (i, (k, _)) in self.kv_records.iter().enumerate() {
 			lu_map_exact.insert(k.to_vec(), i);
 			lu_map_first.entry(k[0])
 				.and_modify(|ref mut v: &mut Vec<usize>| v.push(i))
@@ -83,7 +83,7 @@ impl Memory {
 		self.lu_map_first[&r#char].iter().map(|i| &self.kv_records[*i]).collect()
 	}
 
-	pub fn push_record(&mut self, r: (BvString, BvString, ByteVec)) {
+	pub fn push_record(&mut self, r: (BvString, BvObject)) {
 		if self.lu_map_exact.contains_key(r.0.as_slice()) {
 			self.delete_record(self.index_of_key(r.0.as_slice()))
 		}
@@ -97,7 +97,7 @@ impl Memory {
 	}
 
 	pub fn delete_record(&mut self, i: usize) {
-		let (k, _, _) = &self.kv_records.remove(i);
+		let (k, _) = &self.kv_records.remove(i);
 		self.lu_map_exact.remove(k.as_slice());
 		let index = self.lu_map_first.get(&k[0]).unwrap().iter().position(|r| *r == i);
 		self.lu_map_first.get_mut(&k[0]).unwrap().remove(index.unwrap());
@@ -129,12 +129,12 @@ impl Memory {
 			.and_modify(|v| v.extend(rows));
 	}
 
-	pub fn get_field_map<S: AsRef<str>>(&self, name: S) -> &FieldMap {
-		&self.decl_map[name.as_ref().as_bytes()]
+	pub fn get_field_map(&self, name: &[u8]) -> &FieldMap {
+		&self.decl_map[name]
 	}
 
-	pub fn get_decl_records<S: AsRef<str>>(&self, name: S) -> &Vec<DeclarationRecord> {
-		&self.decl_records.get(name.as_ref().as_bytes()).expect(&format!("No entry found for key {:?}", name.as_ref()))
+	pub fn get_decl_records(&self, name: &[u8]) -> &Vec<DeclarationRecord> {
+		&self.decl_records.get(name).expect(&format!("No entry found for key {:?}", name.as_ref()))
 	}
 }
 

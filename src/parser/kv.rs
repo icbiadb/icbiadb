@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::parser::globals::*;
 use crate::mem::OwnedMemoryRecord;
 use crate::utils::deserialize;
@@ -33,21 +31,6 @@ pub fn seqs_find_all<'a>(v: &'a [u8], seq: &'a [u8]) -> Vec<usize> {
 	idxs
 }
 
-pub fn get_keys_indexes(v: &[u8]) -> HashMap<usize, usize> {
-	let idxs = seqs_find_all(&v, &kv::IDENT);
-	let mut indexes = HashMap::with_capacity(idxs.len());
-
-	let mut cursor = Cursor::new(&v);
-	for idx in idxs {
-		cursor.jump(idx);
-		let (k_len, t_len, v_len) = get_ktv_len(cursor.peek(kv::IDENT_HEAD_BS));
-		let (k, _, _) = extract_single(cursor.get(kv::IDENT_HEAD_BS + k_len + t_len + v_len), k_len, t_len, v_len);
-		indexes.insert(k.iter().map(|b| *b as usize).sum::<usize>(), idx);
-	}
-
-	indexes
-}
-
 #[inline(never)]
 pub fn get_ktv_len<'a>(v: &'a [u8]) -> (usize, usize, usize) {
 	assert_eq!(&v[..3], kv::IDENT);
@@ -60,7 +43,7 @@ pub fn extract_single<'a>(v: &'a [u8], k_len: usize, t_len: usize, v_len: usize)
 	assert_eq!(&v[..3], kv::IDENT);
 	let mut cursor = Cursor::new(v);
 	cursor.jump(kv::IDENT_HEAD_BS);
-	(cursor.get(k_len).into(), cursor.get(t_len).into(), cursor.get(v_len).into())
+	(cursor.get(k_len).into(), (cursor.get(t_len), cursor.get(v_len)).into())
 }
 
 pub fn extract<'a>(v: &'a [u8]) -> Vec<OwnedMemoryRecord> {

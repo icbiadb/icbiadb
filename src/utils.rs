@@ -1,5 +1,5 @@
 use crate::slice;
-use crate::types::bv::ByteVec;
+use crate::types::bv::{ByteVec, BvObject};
 
 
 pub fn normalize_type_name(tn: &[u8]) -> &[u8] {
@@ -17,8 +17,12 @@ pub fn normalize_type_name(tn: &[u8]) -> &[u8] {
 	}
 }
 
-pub fn serialize<T: ?Sized + serde::ser::Serialize>(t: &T) -> Vec<u8> {
-	bincode::serialize(t).unwrap()
+pub fn serialize<T: ?Sized + serde::ser::Serialize>(o: &T) -> Vec<u8> {
+	bincode::serialize(o).unwrap()
+}
+
+pub fn serialize_object<T: ?Sized + serde::ser::Serialize>(o: &T) -> BvObject {
+	BvObject::from(o)
 }
 
 pub fn serialize_to_bytevec<T: ?Sized + serde::ser::Serialize>(t: &T) -> ByteVec {
@@ -27,6 +31,10 @@ pub fn serialize_to_bytevec<T: ?Sized + serde::ser::Serialize>(t: &T) -> ByteVec
 
 pub fn deserialize<'a, T: ?Sized + serde::de::Deserialize<'a>>(t: &'a [u8]) -> T {
 	bincode::deserialize(t).unwrap()
+}
+
+pub fn deserialize_object<'a, T: ?Sized + serde::de::Deserialize<'a>>(t: &'a BvObject) -> T {
+	bincode::deserialize(t.as_slice()).unwrap()
 }
 
 pub fn deserialize_bytevec<'a, T: ?Sized + serde::de::Deserialize<'a>>(t: &'a ByteVec) -> T {

@@ -1,5 +1,29 @@
 ## Changelog
 
+
+
+### 0.1.3, 
+
+
+**Breaking changes**
+
+* Got rid of Record all together
+* Added BvObject which now holds type name and byte vec of object, use BvObject.extract::<type>() for deserialization
+* Db.fetch now returns BvObject
+* Db.filter now takes |(BvKey, BvObject)| as closure parameter and returns Vec<(&BvKey, BvObject)>
+* Db.starts_with, Db.contains and Db.ends_with now returns (&k, &v), i.e Vec<(&BvString, &BvObject)>
+* QueryBuilder now uses BvObject instead of ByteVec
+
+
+**Changes**
+
+* Added type & unique boundary check for declarations
+* Add f32(-> f64), usize(-> u64) & isize(-> i64) to normalize_type_name
+* move log and env_logger to dev-dependencies
+* Added ByteVec PartialCmp\<BvString\> & \<&BvString\> and more...
+* Add boundary check for declaration rows
+
+
 ---
 
 

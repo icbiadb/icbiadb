@@ -3,7 +3,7 @@ macro_rules! query_deserialize (
 	($v:expr, ($($field:ident:$type:ty),+)) => {		
 		$v.iter().map(|r| {
 			let ($($field,)+) = r;
-			($(icbiadb::deserialize_bytevec::<$type>($field),)+)
+			($(icbiadb::deserialize_object::<$type>($field),)+)
 		}).collect::<Vec<_>>()
 	};
 );
@@ -46,7 +46,7 @@ macro_rules! query {
 
 	($db:expr, $name:literal, select $($field:ident),+;filter $f:block) => {{
 		let mut query = $db.query($name);
-		let lam_filter = |$($field:&icbiadb::types::bv::ByteVec),+| $f;
+		let lam_filter = |$($field:&icbiadb::types::bv::BvObject),+| $f;
 
 		query.records().iter()
 			.filter_map(|record| {
@@ -60,13 +60,14 @@ macro_rules! query {
 			.collect::<Vec<_>>()
 	}};
 
-	($db:expr, $name:literal, $(insert ($($key:ident=$val:expr),+)),+) => {
+	($db:expr, $name:literal, $(insert ($($key:ident=$val:expr),+)),+) => {{
 		$(
-			let row = vec![$((stringify!($key).as_bytes().to_vec(), icbiadb::serialize_to_bytevec(&$val))),+].iter().cloned()
+			let row = vec![$((stringify!($key).as_bytes().to_vec(), icbiadb::serialize_object(&$val))),+].iter().cloned()
 				.collect::<std::collections::HashMap<_, _>>();
-			$db.decl_insert_row($name, icbiadb::decl::types::DeclarationRecord::from_hashmap(row));
+
+			$db.decl_insert_row($name, icbiadb::decl::types::DeclarationRecord::from_hashmap(row)).unwrap();
 		)+
-	};
+	}};
 
 	($db:expr, $name:literal, insert_many $v:expr) => {
 		$db.decl_insert_many($name, $v);
