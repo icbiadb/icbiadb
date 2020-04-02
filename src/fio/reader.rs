@@ -17,11 +17,11 @@ pub struct Header {
 	decl_records_len: u64,
 }
 
-pub struct Reader<T: std::io::Read + std::io::Seek> {
+pub struct Reader<T: std::io::BufRead + std::io::Seek> {
 	reader: T,
 }
 
-impl<T: std::io::Read + std::io::Seek> Reader<T> {
+impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 	pub fn new(reader: T) -> Self {
 		Reader {
 			reader: reader,
@@ -33,19 +33,17 @@ impl<T: std::io::Read + std::io::Seek> Reader<T> {
 		#[cfg(test)]
 		let time = std::time::Instant::now();
 
-		let header = match self.read_header() {
-			Ok(h) => h,
-			Err(_) => {
-				// Initialize empty stuff if file is empty
-				*memory.decl_get_mut() = DeclarationMap::new();
-				*memory.kv_records_get_mut() = Vec::new();
-				*memory.decl_records_get_mut() = HashMap::new();
-
+		if let Ok(buf) = self.reader.fill_buf() {
+			// Empty file
+			if buf.len() == 0 {
 				return Ok(())
 			}
-		};
+		}
+
+		let header = self.read_header()?;
 		#[cfg(test)]
 		debug!("{:?}", header);
+
 
 		// TODO
 		// For some reason, reading the header reads 40 bytes, while writing 36 bytes(u32 + u128*2)
