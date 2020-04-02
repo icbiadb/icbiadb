@@ -35,7 +35,7 @@ Screw that! In IcbiaDB, you define the nature of the structure on the spot with 
 
 ```rust
 if_not_exists_declare!{db, "articles",
-	(title: String [unique not_null], date: String)	
+	(title: String, date: String[unique])	
 };
 
 query!{db, "articles",
