@@ -152,21 +152,25 @@ impl std::ops::DerefMut for Memory {
 	}
 }
 
-impl<S: AsRef<str>> std::ops::Index<S> for Memory {
+impl std::ops::Index<&[u8]> for Memory {
 	type Output = OwnedMemoryRecord;
 
-	fn index(&self, key: S) -> &Self::Output {
-		if !self.lu_map_exact.contains_key(key.as_ref().as_bytes()) {
-			panic!("No entry found for key: {:?}", key.as_ref())
+	fn index(&self, key: &[u8]) -> &Self::Output {
+		if !self.lu_map_exact.contains_key(key) {
+			panic!("No entry found for key: {:?}", std::str::from_utf8(key))
 		}
 
-		&self.kv_records[self.lu_map_exact[key.as_ref().as_bytes()]]
+		&self.kv_records[self.lu_map_exact[key]]
 	}
 }
 
-impl<S: AsRef<str>> std::ops::IndexMut<S> for Memory {
-	fn index_mut(&mut self, key: S) -> &mut Self::Output {
-		&mut self.kv_records[self.lu_map_exact[key.as_ref().as_bytes()]]
+impl std::ops::IndexMut<&[u8]> for Memory {
+	fn index_mut(&mut self, key: &[u8]) -> &mut Self::Output {
+		if !self.lu_map_exact.contains_key(key) {
+			panic!("No entry found for key: {:?}", std::str::from_utf8(key))
+		}
+
+		&mut self.kv_records[self.lu_map_exact[key]]
 	}
 }
 
