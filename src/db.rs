@@ -122,6 +122,15 @@ impl Db {
 		self.memory.has_key(key.as_ref().as_bytes())
 	}
 
+	pub fn swap<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, key: S, new_val: T) -> BvObject {
+		let new = serialize_object(&new_val);
+		if self.memory[key.as_ref().as_bytes()].1.as_slice().len() == new.as_slice().len() {
+			return std::mem::replace(&mut self.memory[key.as_ref().as_bytes()].1, new)
+		}
+
+		panic!("Not equal length for swap, key: {}", key.as_ref())
+	}
+
 	pub fn store<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
 		let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
 		assert!(k.len() > 0 && v.type_name().len() > 0);
@@ -164,15 +173,15 @@ impl Db {
 	}
 
 	pub fn fetch<S: AsRef<str>>(&self, key: S) -> &BvObject {
-		&self.memory[key].1
+		&self.memory[key.as_ref().as_bytes()].1
 	}
 
 	pub fn fetch_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
-		self.memory[key].1.extract()
+		self.memory[key.as_bytes()].1.extract()
 	}
 
 	pub fn fetch_raw<S: AsRef<str>>(&self, key: S) -> &OwnedMemoryRecord {
-		&self.memory[key]
+		&self.memory[key.as_ref().as_bytes()]
 	}
 
 	pub fn update<S: AsRef<str>, T: serde::ser::Serialize>(&mut self, k: S, v: T) {
