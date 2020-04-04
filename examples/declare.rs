@@ -37,8 +37,8 @@ fn main() -> io::Result<()> {
 		println!("{} {}", title, date);
 	}
 
-	// Or with objects, do note there are no boundary-checks at all for neither atm
-	let mut my_record = icbiadb::DeclarationRecord::new();
+	// Or with objects
+	let mut my_record = db.query("articles").new_row();
 	my_record.insert("title", "A short title");
 	my_record.insert("date", "today");
 	db.decl_insert_row("articles", my_record);
