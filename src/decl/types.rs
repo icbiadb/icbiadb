@@ -215,6 +215,10 @@ impl<'a> QueryBuilder<'a> {
 		}
 	}
 
+	pub fn new_row(&self) -> DeclarationRecord {
+		DeclarationRecord::new()
+	}
+
 	pub fn field_map(&self) -> &'a FieldMap {
 		&self.field_map
 	}
