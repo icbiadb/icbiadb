@@ -5,12 +5,11 @@ authors = ["Emanuel GS <grundligt@hotmail.com>"]
 edition = "2018"
 description = "IcbiaDB | I can't believe it's a database | KV & data structures database"
 license = "MIT"
-repository = "https://github.com/Grundligt/icbiadb"
+repository = "https://github.com/icbiadb/icbiadb"
 keywords = ["database"]
 readme = "README.md"
 categories = ["database", "database-implementations"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 serde = {version="1.0.104", features=["derive"]}

@@ -112,20 +112,20 @@ impl Memory {
 		self.decl_records.insert(decl.raw_name().to_vec(), Vec::new());
 	}
 
-	pub fn remove_decl<S: AsRef<str>>(&mut self, key: S) {
-		self.decl_map.remove(key.as_ref().as_bytes());
-		self.decl_records.remove(key.as_ref().as_bytes());
+	pub fn remove_decl(&mut self, key: &[u8]) {
+		self.decl_map.remove(key);
+		self.decl_records.remove(key);
 	}
 
-	pub fn decl_insert_row(&mut self, name: &str, record: DeclarationRecord) {
-		let _field_rules = self.decl_map.get(name.as_bytes());
+	pub fn decl_insert_row(&mut self, name: Vec<u8>, record: DeclarationRecord) {
+		let _field_rules = self.decl_map.get(name.as_slice());
 		
-		self.decl_records.entry(name.as_bytes().to_vec())
+		self.decl_records.entry(name)
 			.and_modify(|v| v.push(record));
 	}
 
-	pub fn decl_insert_rows(&mut self, name: &str, rows: Vec<DeclarationRecord>) {
-		self.decl_records.entry(name.as_bytes().to_vec())
+	pub fn decl_insert_rows(&mut self, name: Vec<u8>, rows: Vec<DeclarationRecord>) {
+		self.decl_records.entry(name)
 			.and_modify(|v| v.extend(rows));
 	}
 

@@ -245,7 +245,7 @@ impl Db {
 	}
 
 	pub fn remove_decl<S: AsRef<str>>(&mut self, name: S) {
-		self.memory.remove_decl(name);
+		self.memory.remove_decl(name.as_ref().as_bytes());
 	}
 
 	pub fn decl_get_field_map<S: AsRef<str>>(&self, name: S) -> &FieldMap {
@@ -286,7 +286,7 @@ impl Db {
 			}
 		}
 
-		self.memory.decl_insert_row(name.as_ref(), row);
+		self.memory.decl_insert_row(name.as_ref().as_bytes().to_vec(), row);
 		Ok(())
 	}
 

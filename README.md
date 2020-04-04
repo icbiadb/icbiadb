@@ -1,8 +1,8 @@
 [Latest Version]: https://img.shields.io/badge/crates.io-v0.2.1-blue.svg
 
 [crates.io]: https://crates.io/crates/icbiadb
-[Build Status]: https://travis-ci.com/Grundligt/icbiadb.svg?branch=master
-[travis]: https://travis-ci.com/github/Grundligt/icbiadb
+[Build Status]: https://api.travis-ci.com/icbiadb/icbiadb.svg?branch=master
+[travis]: https://travis-ci.com/github/icbiadb/icbiadb
 
 ## IcbiaDB | I can't believe it's a database &emsp; [![Build Status]][travis] [![Latest Version]][crates.io]
 
@@ -10,7 +10,7 @@
 **Not recommended for production**
 
 
-[Changelog](https://github.com/Grundligt/icbiadb/blob/master/CHANGELOG.md)
+[Changelog](https://github.com/icbiadb/icbiadb/blob/master/CHANGELOG.md)
 
 
 IcbiaDB is a simple headless Key-Value & data structures database with support for storing most types seamlessly. Compared to some other KV databases, IcbiaDB supports partial key searches and soon, atomic operations without serialization, allowing for rather fast ...stuff, on big data sets.
