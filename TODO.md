@@ -9,10 +9,8 @@
 * Implement some kind of basic ACID transactions
 * File-based sessions
 * Regex and range symbols for key filtering? E.g db.fetch("test:\d{3}"), db.fetch("test:10..20")
-* Closure record updates
 * Async feature
 * Migration functionality
-* ~~No references in stored type names~~ Fine-tuning needed though(\*const & \*mut isn't handled)
 * Atomic support on declaration records(search/select(fields?), filter, order(desc & ascd), limit)
 * Deref record with JIT/cached deserialization?
 * Speed up reading & parsing big data sets

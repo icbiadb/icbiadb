@@ -16,6 +16,12 @@ pub fn strip_ref_symbols(v: &[u8]) -> &[u8] {
 		rv = &rv[1..];
 	}
 
+	if rv.starts_with("mut ".as_bytes()) {
+		rv = &rv["mut ".len()..];
+	} else if rv.starts_with("const ".as_bytes()) {
+		rv = &rv["const ".len()..];
+	}
+
 	rv
 }
 
