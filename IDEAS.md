@@ -22,11 +22,6 @@ Or implement a simple function for that use-case(if I don't come up with more ru
 
 
 
-**Database state for input-only**
-
-Rather specific use-case, i.e usefull when you create a app only meant to generate databases, create a state that disables all unnecessary functionality(like lookup maps updating when using store/insert and so on)
-
-
 **KV storage of declarations**
 
 Declaration rules are currently stored at the top of the file, with a start index for the records which are stored after KV records. With KV storage of declarations, all that could be scrapped and only have in-memory separation.

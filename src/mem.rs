@@ -8,7 +8,13 @@ use crate::types::bv::{BvString, BvObject};
 pub type OwnedMemoryRecord = (BvString, BvObject);
 
 
+pub enum MemState {
+	WriteOnly,
+	ReadWrite
+}
+
 pub struct Memory {
+	state: MemState,
 	/// KV storage
 	kv_records: Vec<OwnedMemoryRecord>,
 	/// Group declaration and storage
@@ -22,8 +28,9 @@ pub struct Memory {
 }
 
 impl Memory {
-	pub fn new() -> Self {
+	pub fn new(state: MemState) -> Self {
 		Memory {
+			state: state,
 			kv_records: Vec::new(),
 			decl_map: DeclarationMap::new(),
 			decl_records: DeclarationRecords::new(),
@@ -45,6 +52,8 @@ impl Memory {
 	}
 
 	pub fn generate_lu_maps(&mut self) {
+		if let MemState::WriteOnly = self.state { return }
+
 		let mut lu_map_exact = HashMap::with_capacity(self.kv_records.len());
 		let mut lu_map_first = HashMap::with_capacity(self.kv_records.len());
 
@@ -84,20 +93,28 @@ impl Memory {
 	}
 
 	pub fn push_record(&mut self, r: (BvString, BvObject)) {
+		if let MemState::WriteOnly = self.state {
+			self.kv_records.push(r);
+			return
+		}
+
 		if self.lu_map_exact.contains_key(r.0.as_slice()) {
 			self.delete_record(self.index_of_key(r.0.as_slice()))
 		}
 
-		let new_idx = self.kv_records.len();
-		self.lu_map_exact.insert(r.0.to_vec(), self.kv_records.len());
+		let new_idx = self.kv_records.len()-1;
+		self.lu_map_exact.insert(r.0.to_vec(), new_idx.clone());
 		self.lu_map_first.entry(r.0[0])
 			.and_modify(|v| v.push(new_idx))
 			.or_insert(vec!(new_idx));
 		self.kv_records.push(r);
+
 	}
 
 	pub fn delete_record(&mut self, i: usize) {
 		let (k, _) = &self.kv_records.remove(i);
+		if let MemState::WriteOnly = self.state { return }
+
 		self.lu_map_exact.remove(k.as_slice());
 		let index = self.lu_map_first.get(&k[0]).unwrap().iter().position(|r| *r == i);
 		self.lu_map_first.get_mut(&k[0]).unwrap().remove(index.unwrap());

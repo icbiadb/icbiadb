@@ -1,7 +1,7 @@
 use crate::utils::{serialize, serialize_object, normalize_type_name};
 use crate::decl::types::*;
 use crate::prelude::*;
-use crate::mem::{Memory, OwnedMemoryRecord};
+use crate::mem::{Memory, OwnedMemoryRecord, MemState};
 use crate::fio::FileIO;
 use crate::types::bv::{BvString, BvObject};
 
@@ -27,7 +27,7 @@ impl Db {
 			.open(file_name.as_ref())?;
 
 		let f_io = FileIO::new(f);
-		let mut memory = Memory::new();
+		let mut memory = Memory::new(MemState::ReadWrite);
 		f_io.read_to(&mut memory)?;
 		memory.generate_lu_maps();
 		
@@ -46,7 +46,7 @@ impl Db {
 			.open(file_name.as_ref())?;
 
 		let f_io = FileIO::new(f);
-		let mut memory = Memory::new();
+		let mut memory = Memory::new(MemState::ReadWrite);
 		f_io.read_to(&mut memory)?;
 		memory.generate_lu_maps();
 		
@@ -65,7 +65,7 @@ impl Db {
 
 
 		let f_io = FileIO::new(f);
-		let mut memory = Memory::new();
+		let mut memory = Memory::new(MemState::ReadWrite);
 		f_io.read_to(&mut memory)?;
 		memory.generate_lu_maps();
 
@@ -81,9 +81,29 @@ impl Db {
 		Ok(Db {
 			file_name: String::new(),
 			f_io: None,
-			memory: Memory::new(),
+			memory: Memory::new(MemState::ReadWrite),
 			r#type: DbType::InMemory,
 		})
+	}
+
+	pub fn write_only<S: AsRef<str>>(file_name: S) -> std::io::Result<Self> {
+		let f = std::fs::OpenOptions::new()
+			.write(true)
+			.create(true)
+			.read(true)
+			.open(file_name.as_ref())?;
+
+		let f_io = FileIO::new(f);
+		let mut memory = Memory::new(MemState::WriteOnly);
+		f_io.read_to(&mut memory)?;
+		memory.generate_lu_maps();
+		
+		Ok(Db {
+			file_name: file_name.as_ref().to_string(),
+			f_io: Some(f_io),
+			memory: memory,
+			r#type: DbType::File,
+		})	
 	}
 
 	pub fn file_name(&self) -> &str {
