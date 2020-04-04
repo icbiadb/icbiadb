@@ -4,10 +4,7 @@ use crate::decl::types::*;
 use crate::types::bv::{BvString, BvObject};
 
 
-/// Stores byte data of key, type_name and value
-pub type OwnedMemoryRecord = (BvString, BvObject);
-
-
+#[derive(PartialEq)]
 pub enum MemState {
 	WriteOnly,
 	ReadWrite
@@ -16,26 +13,19 @@ pub enum MemState {
 pub struct Memory {
 	state: MemState,
 	/// KV storage
-	kv_records: Vec<OwnedMemoryRecord>,
+	kv_records: HashMap<Vec<u8>, BvObject>,
 	/// Group declaration and storage
 	decl_map: DeclarationMap,
 	decl_records: DeclarationRecords,
-
-	/// Lookup keys index in records vec
-	lu_map_exact: HashMap<Vec<u8>, usize>,
-	/// Lookup keys starting with u8 in records vec
-	lu_map_first: HashMap<u8, Vec<usize>>,
 }
 
 impl Memory {
 	pub fn new(state: MemState) -> Self {
 		Memory {
 			state: state,
-			kv_records: Vec::new(),
+			kv_records: HashMap::new(),
 			decl_map: DeclarationMap::new(),
 			decl_records: DeclarationRecords::new(),
-			lu_map_exact: HashMap::new(),
-			lu_map_first: HashMap::new(),
 		}
 	}
 
@@ -43,7 +33,7 @@ impl Memory {
 		&mut self.decl_map
 	}
 
-	pub fn kv_records_get_mut(&mut self) -> &mut Vec<OwnedMemoryRecord> {
+	pub fn kv_records_get_mut(&mut self) -> &mut HashMap<Vec<u8>, BvObject> {
 		&mut self.kv_records
 	}
 
@@ -51,28 +41,11 @@ impl Memory {
 		&mut self.decl_records
 	}
 
-	pub fn generate_lu_maps(&mut self) {
-		if let MemState::WriteOnly = self.state { return }
-
-		let mut lu_map_exact = HashMap::with_capacity(self.kv_records.len());
-		let mut lu_map_first = HashMap::with_capacity(self.kv_records.len());
-
-		for (i, (k, _)) in self.kv_records.iter().enumerate() {
-			lu_map_exact.insert(k.to_vec(), i);
-			lu_map_first.entry(k[0])
-				.and_modify(|ref mut v: &mut Vec<usize>| v.push(i))
-				.or_insert(vec!(i));
-		}
-
-		self.lu_map_first = lu_map_first;
-		self.lu_map_exact = lu_map_exact;
-	}
-
 	pub fn declaration_map(&self) -> &DeclarationMap {
 		&self.decl_map
 	}
 
-	pub fn kv_records(&self) -> &Vec<OwnedMemoryRecord> {
+	pub fn kv_records(&self) -> &HashMap<Vec<u8>, BvObject> {
 		&self.kv_records
 	}
 
@@ -80,44 +53,23 @@ impl Memory {
 		&self.decl_records
 	}
 
-	pub fn index_of_key(&self, key: &[u8]) -> usize {
-		self.lu_map_exact[key]
-	}
-
-	pub fn has_key(&self, key: &[u8]) -> bool {
-		self.lu_map_exact.contains_key(key)
-	}
-
-	pub fn char_search(&self, r#char: u8) -> Vec<&OwnedMemoryRecord> {
-		self.lu_map_first[&r#char].iter().map(|i| &self.kv_records[*i]).collect()
-	}
-
 	pub fn push_record(&mut self, r: (BvString, BvObject)) {
-		if let MemState::WriteOnly = self.state {
-			self.kv_records.push(r);
+		if MemState::WriteOnly == self.state {
+			self.kv_records.insert(r.0.to_vec(), r.1);
 			return
 		}
 
-		if self.lu_map_exact.contains_key(r.0.as_slice()) {
+		/*
+		if self.kv_records.contains_key(r.0.as_slice()) {
 			self.delete_record(self.index_of_key(r.0.as_slice()))
 		}
+		*/
 
-		let new_idx = self.kv_records.len()-1;
-		self.lu_map_exact.insert(r.0.to_vec(), new_idx.clone());
-		self.lu_map_first.entry(r.0[0])
-			.and_modify(|v| v.push(new_idx))
-			.or_insert(vec!(new_idx));
-		self.kv_records.push(r);
-
+		self.kv_records.insert(r.0.to_vec(), r.1);
 	}
 
-	pub fn delete_record(&mut self, i: usize) {
-		let (k, _) = &self.kv_records.remove(i);
-		if let MemState::WriteOnly = self.state { return }
-
-		self.lu_map_exact.remove(k.as_slice());
-		let index = self.lu_map_first.get(&k[0]).unwrap().iter().position(|r| *r == i);
-		self.lu_map_first.get_mut(&k[0]).unwrap().remove(index.unwrap());
+	pub fn delete_record(&mut self, key: &[u8]) {
+		let _r = &self.kv_records.remove(key);
 	}
 
 	pub fn decls(&self) -> &DeclarationMap {
@@ -156,7 +108,7 @@ impl Memory {
 }
 
 impl std::ops::Deref for Memory {
-	type Target = Vec<OwnedMemoryRecord>;
+	type Target = std::collections::HashMap<Vec<u8>, BvObject>;
 
 	fn deref(&self) -> &Self::Target {
 		&self.kv_records
@@ -169,25 +121,4 @@ impl std::ops::DerefMut for Memory {
 	}
 }
 
-impl std::ops::Index<&[u8]> for Memory {
-	type Output = OwnedMemoryRecord;
-
-	fn index(&self, key: &[u8]) -> &Self::Output {
-		if !self.lu_map_exact.contains_key(key) {
-			panic!("No entry found for key: {:?}", std::str::from_utf8(key))
-		}
-
-		&self.kv_records[self.lu_map_exact[key]]
-	}
-}
-
-impl std::ops::IndexMut<&[u8]> for Memory {
-	fn index_mut(&mut self, key: &[u8]) -> &mut Self::Output {
-		if !self.lu_map_exact.contains_key(key) {
-			panic!("No entry found for key: {:?}", std::str::from_utf8(key))
-		}
-
-		&mut self.kv_records[self.lu_map_exact[key]]
-	}
-}
 

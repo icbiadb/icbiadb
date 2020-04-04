@@ -16,14 +16,85 @@ pub fn strip_ref_symbols(v: &[u8]) -> &[u8] {
 		rv = &rv[1..];
 	}
 
-	if rv.starts_with("mut ".as_bytes()) {
-		rv = &rv["mut ".len()..];
-	} else if rv.starts_with("const ".as_bytes()) {
-		rv = &rv["const ".len()..];
+	if rv.starts_with(b"mut ") {
+		rv = &rv[4..];
+	} else if rv.starts_with(b"const ") {
+		rv = &rv[6..];
 	}
 
 	rv
 }
+
+
+// Manipulate functions
+
+pub fn find(v: &[u8], seq: &[u8]) -> Option<usize> {
+	if seq.len() > v.len() {
+		return None
+	}
+
+	if v.starts_with(seq) || v == seq {
+		return Some(0)
+	}
+
+	let mut seq_i = 0;
+	for (i, byte) in v.iter().enumerate() {
+		if *byte == seq[seq_i] {
+			seq_i += 1;
+		} else if *byte == seq[0] {
+			seq_i = 1;
+		} else {
+			seq_i = 0;
+		}
+
+		if seq_i == seq.len() {
+			return Some(i-(seq.len()-1))
+		}
+	}
+
+	None
+}
+
+pub fn find_all(v: &[u8], seq: &[u8]) -> Vec<usize> {
+	if seq.len() > v.len() {
+		return vec![]
+	}
+
+	let mut result = Vec::new();
+	let mut seq_i = 0;
+	for (i, byte) in v.iter().enumerate() {
+		if *byte == seq[seq_i] {
+			seq_i += 1;
+		} else if *byte == seq[0] {
+			seq_i = 1;
+		} else {
+			seq_i = 0;
+		}
+
+		if seq_i == seq.len() {
+			result.push(i-(seq.len()-1))
+		}
+	}
+
+	result
+}
+
+pub fn split<'a>(mut v: &'a [u8], seq: &[u8]) -> Vec<&'a [u8]> {
+	if seq.len() > v.len() {
+		return vec![]
+	}
+
+	let mut result = Vec::new();
+
+	while let Some(idx) = find(v, seq) {
+		result.push(&v[..idx]);
+		v = &v[idx+seq.len()..];
+	}
+	result.push(&v);
+
+	result
+}
+
 
 pub fn contains_sequence(v: &[u8], seq: &[u8]) -> bool {
 	if seq.len() > v.len() {
@@ -32,21 +103,12 @@ pub fn contains_sequence(v: &[u8], seq: &[u8]) -> bool {
 
 	let mut seq_i = 0;
 	for byte in v {
-
 		if *byte == seq[seq_i] {
 			seq_i += 1;
+		} else if *byte == seq[0] {
+			seq_i = 1;
 		} else {
-			// Check if current non-equal byte instead equals the first seq byte, then we from there
-			// To avoid a bug where it fails to find some sequences, eg,
-			// v 		seq
-			// 100 		100
-			// 100 		111 Fail, start over
-			// 111		100 Fail
-			if *byte == seq[0] {
-				seq_i = 1;
-			} else {
-				seq_i = 0;
-			}
+			seq_i = 0;
 		}
 
 		if seq_i == seq.len() {

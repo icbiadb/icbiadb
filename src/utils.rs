@@ -45,7 +45,26 @@ pub fn from_utf8(b: &[u8]) -> &str {
 	std::str::from_utf8(b).unwrap()
 }
 
-
+pub fn is_int(b: &[u8]) -> bool {
+	match b {
+		// i8-i128
+		[105, 56] => true,
+		[105, 49, 54] => true,
+		[105, 51, 50] => true,
+		[105, 54, 52] => true,
+		[105, 49, 50, 56] => true,
+		// u8-u128
+		[117, 56] => true,
+		[117, 49, 54] => true,
+		[117, 51, 50] => true,
+		[117, 54, 52] => true,
+		[117, 49, 50, 56] => true,
+		// f32-f64
+		[102, 51, 50] => true,
+		[102, 54, 52] => true,
+		_ => false
+	}
+}
 
 
 

@@ -147,6 +147,14 @@ impl BvObject {
 	}
 }
 
+impl std::ops::Deref for BvObject {
+	type Target = ByteVec;
+
+	fn deref(&self) -> &Self::Target {
+		&self.raw
+	}
+}
+
 impl std::convert::From<(&[u8], &[u8])> for BvObject {
 	fn from(other: (&[u8], &[u8])) -> Self {
 		BvObject::from_tuple(other)

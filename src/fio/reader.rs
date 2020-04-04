@@ -4,8 +4,9 @@ use serde::Deserialize;
 
 use crate::utils::*;
 use crate::decl::types::*;
-use crate::mem::{OwnedMemoryRecord, Memory};
+use crate::mem::{Memory};
 use crate::parser;
+use crate::types::BvObject;
 
 use std::io::{SeekFrom};
 
@@ -60,7 +61,7 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 		let kv_records = if header.records_len > 0 {
 			self.read_kv_records(header.records_len).expect("[Reading KV records] Failed to read KV records")
 		} else {
-			Vec::new()
+			HashMap::new()
 		};
 
 		let decl_records = if header.decl_records_len > 0 {
@@ -119,7 +120,7 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 		Ok(parser::decl::extract_decls(&dbuf))
 	}
 
-	pub fn read_kv_records(&mut self, len: u64) -> std::io::Result<Vec<OwnedMemoryRecord>> {
+	pub fn read_kv_records(&mut self, len: u64) -> std::io::Result<HashMap<Vec<u8>, BvObject>> {
 		let mut dbuf = vec![0u8; len as usize];
 		self.reader.read_exact(&mut dbuf)?;
 		#[cfg(test)]

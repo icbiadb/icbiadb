@@ -1,9 +1,9 @@
 use crate::utils::{serialize, serialize_object, normalize_type_name};
 use crate::decl::types::*;
 use crate::prelude::*;
-use crate::mem::{Memory, OwnedMemoryRecord, MemState};
+use crate::mem::{Memory, MemState};
 use crate::fio::FileIO;
-use crate::types::bv::{BvString, BvObject};
+use crate::types::bv::{BvStr, BvObject};
 
 
 enum DbType {
@@ -29,7 +29,7 @@ impl Db {
 		let f_io = FileIO::new(f);
 		let mut memory = Memory::new(MemState::ReadWrite);
 		f_io.read_to(&mut memory)?;
-		memory.generate_lu_maps();
+		
 		
 		Ok(Db {
 			file_name: file_name.as_ref().to_string(),
@@ -48,7 +48,7 @@ impl Db {
 		let f_io = FileIO::new(f);
 		let mut memory = Memory::new(MemState::ReadWrite);
 		f_io.read_to(&mut memory)?;
-		memory.generate_lu_maps();
+		
 		
 		Ok(Db {
 			file_name: file_name.as_ref().to_string(),
@@ -67,7 +67,7 @@ impl Db {
 		let f_io = FileIO::new(f);
 		let mut memory = Memory::new(MemState::ReadWrite);
 		f_io.read_to(&mut memory)?;
-		memory.generate_lu_maps();
+		
 
 		Ok(Db {
 			file_name: file_name.as_ref().to_string(),
@@ -96,7 +96,6 @@ impl Db {
 		let f_io = FileIO::new(f);
 		let mut memory = Memory::new(MemState::WriteOnly);
 		f_io.read_to(&mut memory)?;
-		memory.generate_lu_maps();
 		
 		Ok(Db {
 			file_name: file_name.as_ref().to_string(),
@@ -126,7 +125,7 @@ impl Db {
 		&self.memory.declaration_map()
 	}
 
-	pub fn kv_records(&self) -> &Vec<OwnedMemoryRecord> {
+	pub fn kv_records(&self) -> &std::collections::HashMap<Vec<u8>, BvObject> {
 		&self.memory.kv_records()
 	}
 
@@ -139,22 +138,22 @@ impl Db {
 	}
 
 	pub fn has_key<S: AsRef<str>>(&self, key: S) -> bool {
-		self.memory.has_key(key.as_ref().as_bytes())
+		self.memory.contains_key(key.as_ref().as_bytes())
 	}
 
 	pub fn swap<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, key: S, new_val: T) -> BvObject {
 		let new = serialize_object(&new_val);
-		if self.memory[key.as_ref().as_bytes()].1.as_slice().len() == new.as_slice().len() {
-			return std::mem::replace(&mut self.memory[key.as_ref().as_bytes()].1, new)
+		if self.memory[key.as_ref().as_bytes()].type_name() == new.type_name() {
+			return std::mem::replace(&mut self.memory.get_mut(key.as_ref().as_bytes()).unwrap(), new)
 		}
 
-		panic!("Not equal length for swap, key: {}", key.as_ref())
+		panic!("Not equal type, key: {}", key.as_ref())
 	}
 
 	pub fn store<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
 		let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
 		assert!(k.len() > 0 && v.type_name().len() > 0);
-		self.memory.push_record((k.into(), v.into()));
+		self.memory.push_record((k.into(), v));
 	}
 
 	pub fn store_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, t: S, v: T) {
@@ -193,46 +192,26 @@ impl Db {
 	}
 
 	pub fn fetch<S: AsRef<str>>(&self, key: S) -> &BvObject {
-		&self.memory[key.as_ref().as_bytes()].1
-	}
-
-	pub fn fetch_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
-		self.memory[key.as_bytes()].1.extract()
-	}
-
-	pub fn fetch_raw<S: AsRef<str>>(&self, key: S) -> &OwnedMemoryRecord {
 		&self.memory[key.as_ref().as_bytes()]
 	}
 
+	pub fn fetch_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
+		self.memory[key.as_bytes()].extract()
+	}
+
 	pub fn update<S: AsRef<str>, T: serde::ser::Serialize>(&mut self, k: S, v: T) {
-		self.memory.delete_record(self.memory.index_of_key(k.as_ref().as_bytes()));
-		self.store(k, v);
-	}
-
-	pub fn update_record(&mut self, record: impl RecordRead) {
-		self.memory.delete_record(self.memory.index_of_key(record.key().as_slice()));
-		self.memory.push_record(record.to_tuple());
-	}
-
-	pub fn update_many(&mut self, records: &Vec<impl RecordRead>) {
-		for record in records {
-			self.memory.delete_record(self.memory.index_of_key(record.key().as_slice()));
-			self.memory.push_record(record.to_tuple());
-		}	
+		let old = self.memory[k.as_ref().as_bytes()].type_name();
+		let new = serialize_object(&v);
+		if old == new.type_name() {
+			*self.memory.get_mut(k.as_ref().as_bytes()).unwrap() = new;
+		} else {
+			self.memory.delete_record(k.as_ref().as_bytes());
+			self.store(k, v);
+		}
 	}
 
 	pub fn remove<S: AsRef<str>>(&mut self, key: S) {
-		self.memory.delete_record(self.memory.index_of_key(key.as_ref().as_bytes()));
-	}
-
-	pub fn remove_record(&mut self, record: impl RecordRead) {
-		self.memory.delete_record(self.memory.index_of_key(record.key().as_slice()));
-	}
-
-	pub fn remove_many(&mut self, records: &Vec<impl RecordRead>) {
-		for record in records {
-			self.memory.delete_record(self.memory.index_of_key(record.key().as_slice()));		
-		}
+		self.memory.delete_record(key.as_ref().as_bytes());
 	}
 
 	pub fn commit(&mut self) -> std::io::Result<()> {
@@ -316,10 +295,6 @@ impl Db {
 		}
 
 		Ok(())
-
-		// TODO
-		// Boundary check(unique) within rows and stored rows and extend
-		//self.memory.decl_insert_rows(name.as_ref(), rows);
 	}
 
 	pub fn query<S: AsRef<str>>(&self, name: S) -> QueryBuilder {
@@ -330,10 +305,10 @@ impl Db {
 }
 
 impl BytesFilter for Db {
-	fn filter<F>(&self, cb: F) -> Vec<&(BvString, BvObject)> where F: Fn(&(BvString, BvObject)) -> bool {
+	fn filter<F>(&self, cb: F) -> Vec<(BvStr, &BvObject)> where F: Fn((BvStr, &BvObject)) -> bool {
 		self.memory.iter()
-			.filter_map(|r| {
-				if cb(&r) { return Some(r) } 
+			.filter_map(|(k, v)| {
+				if cb((BvStr::from(k), v)) { return Some((BvStr::from(k), v)) } 
 				None
 			})
 			.collect()
@@ -343,20 +318,22 @@ impl BytesFilter for Db {
 
 
 impl BytesSearch for Db {
-	fn starts_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(&BvString, &BvObject)> {
+	fn starts_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
 		let k_part = key_part.as_ref().as_bytes();
-		self.memory.char_search(k_part[0]).iter().filter_map(|(k, v)| {
-			if k.starts_with(k_part) {
-				return Some((k, v))
-			}
+		self.memory.iter()
+			.filter_map(|(k, v)| {
+				if k.starts_with(k_part) {
+					return Some((BvStr::from(k), v))
+				}
 
-			None
-		})
-		.collect::<Vec<_>>()
+				None
+			})
+			.collect()
 	}
 
-	fn ends_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(&BvString, &BvObject)> {
+	fn ends_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
 		self.memory.iter().filter_map(|(k, v)| {
+			let k = BvStr::from(k);
 			if k.ends_with(key_part.as_ref().as_bytes()) {
 				return Some((k, v))
 			}
@@ -366,8 +343,9 @@ impl BytesSearch for Db {
 		.collect::<Vec<_>>()
 	}
 
-	fn contains<S: AsRef<str>>(&self, key_part: S) -> Vec<(&BvString, &BvObject)> {
+	fn contains<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
 		self.memory.iter().filter_map(|(k, v)| {
+			let k = BvStr::from(k);
 			if k.contains(key_part.as_ref()) {
 				return Some((k, v))
 			}

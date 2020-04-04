@@ -4,7 +4,7 @@ use crate::parser::globals::*;
 use crate::utils::{serialize};
 use crate::decl::types::*;
 use crate::mem::Memory;
-use crate::types::bv::{BvString, BvObject};
+use crate::types::bv::{BvObject};
 
 use std::io::{SeekFrom};
 
@@ -130,7 +130,7 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		Ok(())
 	}
 
-	pub fn write_kv_record(&mut self, record: &(BvString, BvObject)) -> std::io::Result<u64> {
+	pub fn write_kv_record(&mut self, record: (&Vec<u8>, &BvObject)) -> std::io::Result<u64> {
 		// Identifier, name length, fields length, name, fields
 		let (k, v) = record;
 		assert!(k.len() as u8 > 0 && v.type_name().len() as u8 > 0);
