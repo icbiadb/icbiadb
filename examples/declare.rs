@@ -32,9 +32,10 @@ fn main() -> io::Result<()> {
 	};
 
 	let articles = query_deserialize!(articles, (title: String, date: String));
-	println!("{:?}", articles);
 
-
+	for (title, date) in articles {
+		println!("{} {}", title, date);
+	}
 
 	// Or with objects, do note there are no boundary-checks at all for neither atm
 	let mut my_record = icbiadb::DeclarationRecord::new();
