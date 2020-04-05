@@ -16,7 +16,7 @@ impl<I: Eq, V> IndexVec<I, V> {
 	}
 
 	fn has_index(&self, b: &I) -> bool {
-		for (i, (index, _)) in self.0.iter().enumerate() {
+		for (index, _) in self.0.iter() {
 			if index == b {
 				return true
 			}
@@ -125,8 +125,8 @@ impl KvInterface for IndexedKvStorage {
 			self.inner.push((key[0], vec![(key, v)].into()));
 			return
 		}
-		
-		self.inner[&key[0]].push((key.to_vec(), v))
+
+		self.inner[&key[0]].push((key.to_vec(), v));
 	}
 
 	fn insert_many(&mut self, records: Vec<(Vec<u8>, BvObject)>) {

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::decl::types::*;
 use crate::types::bv::{BvString, BvObject};
 use crate::storage::KvInterface;
