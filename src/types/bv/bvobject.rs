@@ -15,7 +15,7 @@ use super::{ByteVec, BvString};
 
 
 
-#[derive(Serialize, Deserialize, Clone, Hash, Debug)]
+#[derive(Default, Serialize, Deserialize, Clone, Hash, Debug)]
 pub struct BvObject {
 	type_name: BvString,
 	raw: ByteVec,

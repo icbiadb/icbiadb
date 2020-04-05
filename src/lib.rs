@@ -22,6 +22,7 @@ pub mod db;
 pub mod slice;
 pub mod types;
 pub mod macros;
+pub mod storage;
 mod mem;
 mod fio;
 

@@ -11,6 +11,8 @@ use std::{
 use crate::mem::Memory;
 use writer::Writer;
 use reader::Reader;
+use crate::storage::KvInterface;
+use crate::types::BvObject;
 
 pub struct FileIO {
 	writer: RwLock<Writer<BufWriter<std::fs::File>>>,
@@ -27,12 +29,18 @@ impl FileIO {
 		}
 	}
 
-	pub fn read_to(&self, mut memory: &mut Memory) -> std::io::Result<()> {
+	pub fn read_to<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>>(&self, mut memory: &mut Memory<KV>) -> std::io::Result<()> {
 		let mut reader = self.reader.write().unwrap();
 		reader.read_to(&mut memory)
 	}
 
-	pub fn dump_mem(&mut self, mem: &Memory) -> std::io::Result<()> {
+	/*
+	Higher ranked trait bounds (HRTB for short)
+	Here you can pretty much read it as "for any possible lifetime 'a"
+	*/
+	pub fn dump_mem<KV>(&mut self, mem: &Memory<KV>) -> std::io::Result<()> 
+			where KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>,
+			for<'a> &'a KV: IntoIterator<Item = &'a (Vec<u8>, BvObject)> {
 		let mut writer = self.writer.write().unwrap();
 		writer.dump_memory(mem)
 	}

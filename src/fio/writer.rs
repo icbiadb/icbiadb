@@ -5,6 +5,7 @@ use crate::utils::{serialize};
 use crate::decl::types::*;
 use crate::mem::Memory;
 use crate::types::bv::{BvObject};
+use crate::storage::KvInterface;
 
 use std::io::{SeekFrom};
 
@@ -29,7 +30,9 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		}
 	}
 
-	pub fn dump_memory(&mut self, memory: &Memory) -> std::io::Result<()> {
+	pub fn dump_memory<KV>(&mut self, memory: &Memory<KV>) -> std::io::Result<()>
+			where KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>,
+			for<'a> &'a KV: IntoIterator<Item = &'a (Vec<u8>, BvObject)> {
 		self.curr_pos += self.write_header()?;
 
 		// Declarations
@@ -43,8 +46,9 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		// KV
 		// TODO
 		// For some reason u128 increased write size when casting from u64
-		for record in memory.kv_records().iter() {
-			self.kv_records_length += self.write_kv_record(record)?;
+		let kv_records = memory.kv_records();
+		for record in kv_records.into_iter() {
+			self.kv_records_length += self.write_kv_record(&record)?;
 		}
 		self.curr_pos += self.kv_records_length as usize;
 		self.writer.flush()?;
@@ -130,7 +134,7 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 		Ok(())
 	}
 
-	pub fn write_kv_record(&mut self, record: (&Vec<u8>, &BvObject)) -> std::io::Result<u64> {
+	pub fn write_kv_record(&mut self, record: &(Vec<u8>, BvObject)) -> std::io::Result<u64> {
 		// Identifier, name length, fields length, name, fields
 		let (k, v) = record;
 		assert!(k.len() as u8 > 0 && v.type_name().len() as u8 > 0);

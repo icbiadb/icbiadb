@@ -2,6 +2,7 @@ use crate::parser::globals::*;
 use crate::types::BvObject;
 use crate::utils::deserialize;
 use crate::types::cursor::Cursor;
+use crate::storage::KvInterface;
 
 
 pub fn seqs_find_all<'a>(v: &'a [u8], seq: &'a [u8]) -> Vec<usize> {
@@ -46,19 +47,20 @@ pub fn extract_single<'a>(v: &'a [u8], k_len: usize, t_len: usize, v_len: usize)
 	(cursor.get(k_len).into(), (cursor.get(t_len), cursor.get(v_len)).into())
 }
 
-pub fn extract<'a>(v: &'a [u8]) -> std::collections::HashMap<Vec<u8>, BvObject> {
+pub fn extract<'a, KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>>(v: &'a [u8]) -> KV {
 	assert_eq!(v[..3], kv::IDENT);
 	let idxs = seqs_find_all(&v, &kv::IDENT);
 
-	let mut vec = std::collections::HashMap::with_capacity(idxs.len());
+	//let mut vec = std::collections::HashMap::with_capacity(idxs.len());
+	let mut storage = KV::default();
 
 	let mut cursor = Cursor::new(&v);
 	for idx in idxs {
 		cursor.jump(idx);
 		let (k_len, t_len, v_len) = get_ktv_len(cursor.peek(kv::IDENT_HEAD_BS));
 		let (k, v) = extract_single(cursor.get(kv::IDENT_HEAD_BS + k_len + t_len + v_len), k_len, t_len, v_len);
-		vec.insert(k, v);
+		storage.insert(k, v);
 	}
 
-	vec
+	storage
 }

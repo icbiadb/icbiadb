@@ -14,7 +14,7 @@ use std::convert::TryFrom;
 
 
 
-#[derive(Serialize, Deserialize, Clone, Hash, Debug, Eq)]
+#[derive(Default, Serialize, Deserialize, Clone, Hash, Debug, Eq)]
 pub struct ByteVec(Vec<u8>);
 
 impl ByteVec {

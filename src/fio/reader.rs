@@ -7,6 +7,7 @@ use crate::decl::types::*;
 use crate::mem::{Memory};
 use crate::parser;
 use crate::types::BvObject;
+use crate::storage::KvInterface;
 
 use std::io::{SeekFrom};
 
@@ -29,7 +30,7 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 		}
 	}
 
-	pub fn read_to(&mut self, memory: &mut Memory) -> std::io::Result<()> {
+	pub fn read_to<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>>(&mut self, memory: &mut Memory<KV>) -> std::io::Result<()> {
 		// TODO, move data initialization for memory upward in the function call stack
 		#[cfg(test)]
 		let time = std::time::Instant::now();
@@ -61,7 +62,7 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 		let kv_records = if header.records_len > 0 {
 			self.read_kv_records(header.records_len).expect("[Reading KV records] Failed to read KV records")
 		} else {
-			HashMap::new()
+			KV::default()
 		};
 
 		let decl_records = if header.decl_records_len > 0 {
@@ -120,7 +121,7 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 		Ok(parser::decl::extract_decls(&dbuf))
 	}
 
-	pub fn read_kv_records(&mut self, len: u64) -> std::io::Result<HashMap<Vec<u8>, BvObject>> {
+	pub fn read_kv_records<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>>(&mut self, len: u64) -> std::io::Result<KV> {
 		let mut dbuf = vec![0u8; len as usize];
 		self.reader.read_exact(&mut dbuf)?;
 		#[cfg(test)]

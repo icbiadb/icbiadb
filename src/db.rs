@@ -4,7 +4,8 @@ use crate::prelude::*;
 use crate::mem::{Memory, MemState};
 use crate::fio::FileIO;
 use crate::types::bv::{BvStr, BvObject};
-
+use crate::storage::IndexedKvStorage;
+use crate::storage::KvInterface;
 
 enum DbType {
 	InMemory,
@@ -14,7 +15,7 @@ enum DbType {
 pub struct Db {
 	file_name: String,
 	f_io: Option<FileIO>,
-	memory: Memory,
+	memory: Memory<IndexedKvStorage>,
 	r#type: DbType,
 }
 
@@ -109,11 +110,11 @@ impl Db {
 		self.file_name.as_str()
 	}
 
-	pub fn memory(&self) -> &Memory {
+	pub fn memory(&self) -> &Memory<IndexedKvStorage> {
 		&self.memory
 	}
 
-	pub fn memory_mut(&mut self) -> &mut Memory {
+	pub fn memory_mut(&mut self) -> &mut Memory<IndexedKvStorage> {
 		&mut self.memory
 	}
 
@@ -125,7 +126,7 @@ impl Db {
 		&self.memory.declaration_map()
 	}
 
-	pub fn kv_records(&self) -> &std::collections::HashMap<Vec<u8>, BvObject> {
+	pub fn kv_records(&self) -> &IndexedKvStorage {
 		&self.memory.kv_records()
 	}
 
@@ -144,7 +145,7 @@ impl Db {
 	pub fn swap<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, key: S, new_val: T) -> BvObject {
 		let new = serialize_object(&new_val);
 		if self.memory[key.as_ref().as_bytes()].type_name() == new.type_name() {
-			return std::mem::replace(&mut self.memory.get_mut(key.as_ref().as_bytes()).unwrap(), new)
+			return std::mem::replace(&mut self.memory.get_mut(key.as_ref().as_bytes()), new)
 		}
 
 		panic!("Not equal type, key: {}", key.as_ref())
@@ -203,7 +204,7 @@ impl Db {
 		let old = self.memory[k.as_ref().as_bytes()].type_name();
 		let new = serialize_object(&v);
 		if old == new.type_name() {
-			*self.memory.get_mut(k.as_ref().as_bytes()).unwrap() = new;
+			*self.memory.get_mut(k.as_ref().as_bytes()) = new;
 		} else {
 			self.memory.delete_record(k.as_ref().as_bytes());
 			self.store(k, v);
@@ -225,7 +226,7 @@ impl Db {
 
 			self.f_io = Some(FileIO::new(f));
 			self.r#type = DbType::File;
-			self.f_io.as_mut().unwrap().dump_mem(&self.memory).unwrap()
+			self.f_io.as_mut().unwrap().dump_mem::<IndexedKvStorage>(&self.memory).unwrap()
 		}
 
 		Err(std::io::Error::new(std::io::ErrorKind::Other, "File name not set, are you using a memory database?"))
@@ -306,7 +307,7 @@ impl Db {
 
 impl BytesFilter for Db {
 	fn filter<F>(&self, cb: F) -> Vec<(BvStr, &BvObject)> where F: Fn((BvStr, &BvObject)) -> bool {
-		self.memory.iter()
+		(&self.memory.kv_records()).into_iter()
 			.filter_map(|(k, v)| {
 				if cb((BvStr::from(k), v)) { return Some((BvStr::from(k), v)) } 
 				None
@@ -320,7 +321,7 @@ impl BytesFilter for Db {
 impl BytesSearch for Db {
 	fn starts_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
 		let k_part = key_part.as_ref().as_bytes();
-		self.memory.iter()
+		(&self.memory.kv_records()).into_iter()
 			.filter_map(|(k, v)| {
 				if k.starts_with(k_part) {
 					return Some((BvStr::from(k), v))
@@ -332,27 +333,29 @@ impl BytesSearch for Db {
 	}
 
 	fn ends_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
-		self.memory.iter().filter_map(|(k, v)| {
-			let k = BvStr::from(k);
-			if k.ends_with(key_part.as_ref().as_bytes()) {
-				return Some((k, v))
-			}
+		(&self.memory.kv_records()).into_iter()
+			.filter_map(|(k, v)| {
+				let k = BvStr::from(k);
+				if k.ends_with(key_part.as_ref().as_bytes()) {
+					return Some((k, v))
+				}
 
-			None
-		})
-		.collect::<Vec<_>>()
+				None
+			})
+			.collect::<Vec<_>>()
 	}
 
 	fn contains<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
-		self.memory.iter().filter_map(|(k, v)| {
-			let k = BvStr::from(k);
-			if k.contains(key_part.as_ref()) {
-				return Some((k, v))
-			}
+		(&self.memory.kv_records()).into_iter()
+			.filter_map(|(k, v)| {
+				let k = BvStr::from(k);
+				if k.contains(key_part.as_ref()) {
+					return Some((k, v))
+				}
 
-			None
-		})
-		.collect::<Vec<_>>()
+				None
+			})
+			.collect::<Vec<_>>()
 	}
 }
 

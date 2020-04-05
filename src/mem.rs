@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::decl::types::*;
 use crate::types::bv::{BvString, BvObject};
+use crate::storage::KvInterface;
 
 
 #[derive(PartialEq)]
@@ -10,30 +11,46 @@ pub enum MemState {
 	ReadWrite
 }
 
-pub struct Memory {
+pub struct Memory<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> {
 	state: MemState,
 	/// KV storage
-	kv_records: HashMap<Vec<u8>, BvObject>,
+	kv_records: KV,
 	/// Group declaration and storage
 	decl_map: DeclarationMap,
 	decl_records: DeclarationRecords,
 }
 
-impl Memory {
+impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
 	pub fn new(state: MemState) -> Self {
 		Memory {
 			state: state,
-			kv_records: HashMap::new(),
+			kv_records: KV::default(),
 			decl_map: DeclarationMap::new(),
 			decl_records: DeclarationRecords::new(),
 		}
+	}
+
+	pub fn get(&self, key: &[u8]) -> &BvObject {
+		self.kv_records.get(key)
+	}
+
+	pub fn get_mut(&mut self, key: &[u8]) -> &mut BvObject {
+		self.kv_records.get_mut(key)
+	}
+
+	pub fn len(&self) -> usize {
+		self.kv_records.len()
+	}
+
+	pub fn contains_key(&self, key: &[u8]) -> bool {
+		self.kv_records.has_key(key)
 	}
 
 	pub fn decl_get_mut(&mut self) -> &mut DeclarationMap {
 		&mut self.decl_map
 	}
 
-	pub fn kv_records_get_mut(&mut self) -> &mut HashMap<Vec<u8>, BvObject> {
+	pub fn kv_records_get_mut(&mut self) -> &mut KV {
 		&mut self.kv_records
 	}
 
@@ -45,7 +62,7 @@ impl Memory {
 		&self.decl_map
 	}
 
-	pub fn kv_records(&self) -> &HashMap<Vec<u8>, BvObject> {
+	pub fn kv_records(&self) -> &KV {
 		&self.kv_records
 	}
 
@@ -107,7 +124,23 @@ impl Memory {
 	}
 }
 
-impl std::ops::Deref for Memory {
+
+impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> std::ops::Index<&[u8]> for Memory<KV> {
+	type Output = BvObject;
+
+	fn index(&self, index: &[u8]) -> &Self::Output {
+		self.kv_records.get(index)
+	}
+}
+
+impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> std::ops::IndexMut<&[u8]> for Memory<KV> {
+	fn index_mut(&mut self, index: &[u8]) -> &mut Self::Output {
+		self.kv_records.get_mut(index)
+	}
+}
+
+/*
+impl<K, V> std::ops::Deref for Memory<K, V> {
 	type Target = std::collections::HashMap<Vec<u8>, BvObject>;
 
 	fn deref(&self) -> &Self::Target {
@@ -120,5 +153,5 @@ impl std::ops::DerefMut for Memory {
 		&mut self.kv_records
 	}
 }
-
+*/
 

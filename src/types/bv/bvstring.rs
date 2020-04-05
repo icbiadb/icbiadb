@@ -5,7 +5,7 @@ use crate::slice::*;
 
 
 
-#[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone, Hash, Eq)]
 pub struct BvString(Vec<u8>);
 
 impl BvString {
