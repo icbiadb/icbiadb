@@ -1,6 +1,21 @@
 ## Changelog
 
 
+### 0.2.2 2020-04-06
+
+
+* Add BvTuple and atomic change of element value if equal type and length 
+* Impl generic storage for KV records 
+* Impl a first-byte index vector storage for KV records
+* Impl BvStr, borrows &[u8]
+* BvObject now derefs to BvObject.raw
+* Add slice helper functions(find, find_all, split)
+* Added MemState and icbiadb::write_only initialization
+* Add Db.query().new_row, just creates a DeclarationRecord::new()
+* Db.update now checks length and simply overwrite the KV value
+* Add Db.swap, replace KV value if serialized byte vec is of equal lengths
+* Memory, all functions now takes &[u8] as parameter instead of strings, the Db layer converts strings to bytes
+* slice::strip_ref_symbols now removes \*const & \*mut as well
 
 
 ### 0.2.1 2020-04-2

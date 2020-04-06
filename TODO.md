@@ -2,6 +2,7 @@
 ### TODO
 
 
+* Data deduplication
 * Implement Bv[Type] wrapper for atomic operations on values(E.g, BvVec[3] == 100 retrieves and bitwise/deserialize compares serialized vectors fourth element, BvString.replace("hello", "hi") changes byte values and resizes)
 * Cached single-time deserialization for records
 * Nicer error-handling/more helpful panics
@@ -20,8 +21,6 @@
 
 **Macros**
 
-* Macro for defining a new declaration
-* [query] insert_many (Vec<HashMap> & Vec<()>)
 * [query] Implement order_by, group_by?
 * [query_deserialize] change params to only take type instead of $field:ident:$t:ty(ident used for tuple deconstruct atm, alternatives?)
 
