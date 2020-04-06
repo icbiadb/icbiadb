@@ -1,4 +1,4 @@
-[Latest Version]: https://img.shields.io/badge/crates.io-v0.2.1-blue.svg
+[Latest Version]: https://img.shields.io/badge/crates.io-v0.2.2-blue.svg
 
 [crates.io]: https://crates.io/crates/icbiadb
 [Build Status]: https://travis-ci.com/icbiadb/icbiadb.svg?branch=master
