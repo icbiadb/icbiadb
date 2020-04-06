@@ -107,6 +107,10 @@ impl KvInterface for IndexedKvStorage {
 	type Value = BvObject;
 	type RefKey = [u8];
 
+	fn indexes_len(&self) -> usize {
+		self.inner.len()
+	}
+
 	fn has_key(&self, key: &[u8]) -> bool {
 		self.inner[&key[0]].has_index(&key.to_vec())
 	}
@@ -227,6 +231,9 @@ impl<'a> std::iter::Iterator for IndexedKvStorageIter<'a> {
 			self.index += 1;
 		} else {
 			self.key_part += 1;
+			if self.key_part == self.inner.indexes_len() {
+				return None
+			}
 		}
 
 		item
