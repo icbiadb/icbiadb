@@ -155,6 +155,12 @@ impl std::ops::Deref for BvObject {
 	}
 }
 
+impl std::ops::DerefMut for BvObject {
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.raw
+	}
+}
+
 impl std::convert::From<(&[u8], &[u8])> for BvObject {
 	fn from(other: (&[u8], &[u8])) -> Self {
 		BvObject::from_tuple(other)

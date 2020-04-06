@@ -153,6 +153,18 @@ impl std::cmp::PartialEq<BvString> for BvString {
 	}
 }
 
+impl std::cmp::PartialEq<&BvString> for BvString {
+	fn eq(&self, other: &&BvString) -> bool {
+		&self.0 == other.inner()
+	}
+}
+
+impl std::cmp::PartialEq<BvStr<'_>> for BvString {
+	fn eq(&self, other: &BvStr<'_>) -> bool {
+		self.0.as_slice() == other.inner()
+	}
+}
+
 impl std::cmp::PartialEq<String> for BvString {
 	fn eq(&self, other: &String) -> bool {
 		self.as_slice() == other.as_bytes()
@@ -326,6 +338,11 @@ impl std::ops::Index<std::ops::RangeTo<usize>> for BvStr<'_> {
 }
 
 
+impl std::cmp::PartialEq<&BvString> for BvStr<'_> {
+	fn eq(&self, other: &&BvString) -> bool {
+		self.0 == other.as_slice()
+	}
+}
 
 impl std::cmp::PartialEq<BvStr<'_>> for BvStr<'_> {
 	fn eq(&self, other: &BvStr<'_>) -> bool {

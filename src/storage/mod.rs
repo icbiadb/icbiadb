@@ -13,6 +13,7 @@ pub trait KvInterface: std::default::Default + IntoIterator {
 
 	fn has_key(&self, key: &Self::RefKey) -> bool;
 	fn len(&self) -> usize;
+	fn indexes_len(&self) -> usize;
 
 	fn insert(&mut self, key: Self::Key, value: Self::Value);
 	fn insert_many(&mut self, records: Vec<(Self::Key, Self::Value)>);

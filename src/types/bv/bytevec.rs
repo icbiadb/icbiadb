@@ -180,6 +180,30 @@ impl std::ops::Index<std::ops::RangeTo<usize>> for ByteVec {
 	}
 }
 
+impl std::ops::IndexMut<usize> for ByteVec {
+	fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+		&mut self.0[i]
+	}
+}
+
+impl std::ops::IndexMut<std::ops::Range<usize>> for ByteVec {
+	fn index_mut(&mut self, i: std::ops::Range<usize>) -> &mut Self::Output {
+		&mut self.0[..][i]
+	}
+}
+
+impl std::ops::IndexMut<std::ops::RangeFrom<usize>> for ByteVec {
+	fn index_mut(&mut self, i: std::ops::RangeFrom<usize>) -> &mut Self::Output {
+		&mut self.0[..][i]
+	}
+}
+
+impl std::ops::IndexMut<std::ops::RangeTo<usize>> for ByteVec {
+	fn index_mut(&mut self, i: std::ops::RangeTo<usize>) -> &mut Self::Output {
+		&mut self.0[..][i]
+	}
+}
+
 
 impl std::cmp::PartialEq<ByteVec> for ByteVec {
 	fn eq(&self, other: &ByteVec) -> bool {
