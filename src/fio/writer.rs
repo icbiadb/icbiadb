@@ -32,7 +32,7 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 
 	pub fn dump_memory<KV>(&mut self, memory: &Memory<KV>) -> std::io::Result<()>
 			where KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>,
-			for<'a> &'a KV: IntoIterator<Item = &'a (Vec<u8>, BvObject)> {
+				for<'a> &'a KV: IntoIterator<Item = &'a (Vec<u8>, BvObject)> {
 		self.curr_pos += self.write_header()?;
 
 		// Declarations

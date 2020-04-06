@@ -40,7 +40,7 @@ impl FileIO {
 	*/
 	pub fn dump_mem<KV>(&mut self, mem: &Memory<KV>) -> std::io::Result<()> 
 			where KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>,
-			for<'a> &'a KV: IntoIterator<Item = &'a (Vec<u8>, BvObject)> {
+				for<'a> &'a KV: IntoIterator<Item = &'a (Vec<u8>, BvObject)> {
 		let mut writer = self.writer.write().unwrap();
 		writer.dump_memory(mem)
 	}
