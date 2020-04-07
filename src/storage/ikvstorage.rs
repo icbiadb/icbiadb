@@ -112,7 +112,13 @@ impl KvInterface for IndexedKvStorage {
 	}
 
 	fn has_key(&self, key: &[u8]) -> bool {
-		self.inner[&key[0]].has_index(&key.to_vec())
+		if !self.inner.has_index(&key[0]) {
+			return false
+		} else if !self.inner[&key[0]].has_index(&key.to_vec()) {
+			return false
+		}
+		
+		true
 	}
 
 	fn len(&self) -> usize {
