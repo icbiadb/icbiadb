@@ -20,6 +20,72 @@ The basic goal though, is merely a quick and dirty relatively reliable database 
 I.e, anything but a database library I've ever heard of, especially in this fine language.
 
 
+**Features**
+
+* Atomic operations on tuples(soon vec), integers and strings without deserialization
+* Indexed vector storage and in the future multi key-part indexed vector and multiple storage options(Binary tree, HashMap etc)
+* Key-search, starts_with, ends_with or contains
+* Filter by key, type name or value
+* Declarative data structures
+
+
+**Example**
+
+Example
+
+
+```rust
+use serde::{Serialize, Deserialize};
+
+use icbiadb::prelude::*;
+
+
+
+#[derive(Serialize, Deserialize)]
+struct Article {
+	title: String,
+	text: String,
+}
+
+fn main() -> std::io::Result<()> {
+	let mut db = icbiadb::mem()?;
+	
+	// Store, fetch, update
+	db.store("key:welcome", "Hello World!");
+	let v = db.fetch("key:welcome");
+	println!("{:?} of type {}", v.extract::<String>(), v.type_name());
+
+	db.update("key:welcome", 100);
+	let key_welcome = db.fetch_value::<i32>("key:welcome");
+
+	let article = Article { title: "A title".to_string(), text: "Hello World!".to_string() };
+	db.store("articles:0", &article);
+	db.store("string_key:0", "This string contains \"this is a string\"");
+
+	// Atomic operations on tuples without deserialization
+	// Requires same type and length though... yet
+	db.store("my_tuple", (100, 100, "hello world!"));
+	db.fetch_rtuple("my_tuple").update(1, 111); // -> (100, 111, "hello world!")
+	db.fetch_rtuple("my_tuple").value::<i32>(1); // -> 111
+	db.fetch_rtuple("my_tuple").update(2, "hello!!!!!!!");
+
+	// Seamless string bytes comparison, integers are atm converted natively(from_le_bytes)
+	let articles = db.filter(|(k, v)| {
+		v.type_name() == "IcbiaDB_tests::Article"
+		|| v.contains("this is a string")
+		|| (v > 100.0 && v < 200.0) && k.starts_with("calculations:")
+	});
+
+	println!("Found {} keys starting with \"key:\"", keys.len());
+	println!("Found {} keys of type \"Article\"", articles.len());
+
+	Ok(())
+}
+```
+
+---
+
+
 **Key-Value records**
 
 As mentioned above, store pretty much anything you like, from any serde::Serializeable type in rust to primitive types in supported languages to raw byte arrays, search for keys with partial key searches and filter records by type or value.
@@ -65,56 +131,6 @@ Serialization & deserialization is not necessarily a slow procedure, but for low
 
 IcbiaDB stores everything as simple byte arrays and don't mess with it once its been loaded into memory, so it's possible to serialize your complex structure in your chosen language, store it raw, maybe manipulate it with the built-in byte utilities or your own, and deserialize it without any interference from IcbiaDB.
 
-
----
-
-
-Example
-
-
-```rust
-use serde::{Serialize, Deserialize};
-
-use icbiadb::prelude::*;
-
-
-
-#[derive(Serialize, Deserialize)]
-struct Article {
-	title: String,
-	text: String,
-}
-
-fn main() -> std::io::Result<()> {
-	let mut db = icbiadb::mem()?;
-	
-	db.store("key:welcome", "Hello World!");
-	let v = db.fetch("key:welcome");
-	println!("{:?} of type {}", v.extract::<String>(), v.type_name());
-
-	db.update("key:welcome", 100);
-	println!("{}", db.fetch_value::<i32>("key:welcome"));
-
-	let article = Article { title: "A title".to_string(), text: "Hello World!".to_string() };
-	db.store("articles:0", &article);
-
-	db.store("string_key:0", "This string contains \"this is a string\"");
-
-	let keys = db.starts_with("key:");
-
-	// Seamless string bytes comparison, integers are atm converted natively(from_le_bytes)
-	let articles = db.filter(|(k, v)| {
-		v.type_name() == "IcbiaDB_tests::Article"
-		|| v.contains("this is a string")
-		|| (v > 100.0 && v < 200.0) && k.starts_with("calculations:")
-	});
-
-	println!("Found {} keys starting with \"key:\"", keys.len());
-	println!("Found {} keys of type \"Article\"", articles.len());
-
-	Ok(())
-}
-```
 
 ---
 

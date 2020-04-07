@@ -3,7 +3,7 @@
 
 
 * Data deduplication
-* Implement Bv[Type] wrapper for atomic operations on values(E.g, BvVec[3] == 100 retrieves and bitwise/deserialize compares serialized vectors fourth element, BvString.replace("hello", "hi") changes byte values and resizes)
+* ~~Implement Bv[Type] wrapper for atomic operations on values(E.g, BvVec[3] == 100 retrieves and bitwise/deserializecompares serialized vectors fourth element, BvString.replace("hello", "hi") changes byte values and resizes)~~ Same type/same length updates have been implemented
 * Cached single-time deserialization for records
 * Nicer error-handling/more helpful panics
 * Redeclare declarations, add/remove columns, rename, change types, return records that don't fit the changes for deletion/updating(Might be useful later, if a script language is ever created for some db stuff or something)
@@ -18,6 +18,11 @@
 * Clean everything up
 * Optimize everything
 * Steal more ideas from Redis, MySQL and other DBs
+
+**IndexedKvStructure**
+
+* Key separator seperated multi-indexing for IndexedKvStructure(up to 6 keys or something) 
+
 
 **Macros**
 

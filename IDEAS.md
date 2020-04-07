@@ -3,9 +3,9 @@ This is merely ideas that might be implemented if there are any use.
 
 **QOL moccup**
 
-Rules for key-part identifiers, might be added regardless of replacing declarations with kv records collections.
+Rules for key-part identifiers.
 
-key-base(identifier), separator, option(auto-increment, ..)
+key-base(identifier), separator, option(auto-increment, etc)
 ```
 db.key_config("my_integers", ":", KvRule::AutoIncrement)
 db.store("my_integers", 20) -> "my_integers:0" = 20
@@ -20,34 +20,6 @@ And merely just add some unique identifier for that key-rule in the keys when wr
 Or implement a simple function for that use-case(if I don't come up with more rules)
 ```db.store_autoincr_or_something("my_integers", 20)...```
 
-
-
-**KV storage of declarations**
-
-Declaration rules are currently stored at the top of the file, with a start index for the records which are stored after KV records. With KV storage of declarations, all that could be scrapped and only have in-memory separation.
-
-I.e, ```db.declare("Article").add_field::<str>("Title")```
-
-Which get stored as a regular KV record,
-
-```
-## In file ##
-__decl__Article = HashMap<Field name, Config>
-
-# Records
-__decl_record__Article:\d = HashMap/Vec<(Field name, Value)>
-```
-
-
-Pros:
-
-* Makes the database less complex under the hood
-
-
-Cons:
-
-* While not yet implemented, selective reading of just a declaration and its records?
-* Performence?
 
 
 **Key-part configuration**
