@@ -145,6 +145,18 @@ impl Db {
 		self.memory.contains_key(key.as_ref().as_bytes())
 	}
 
+	pub fn swap<S: AsRef<str>, T: serde::Serialize>(&mut self, key: S, value: T) -> BvObject {
+		let mut new_obj = serialize_object(&value);
+		let mut old_obj = self.memory.get_mut(key.as_ref().as_bytes());
+		
+		if new_obj.type_name() == old_obj.type_name() && new_obj.raw().len() == old_obj.raw().len() {
+			let old = std::mem::replace(old_obj, new_obj);
+			return old;
+		}
+
+		panic!("Not same type or equal length")
+	}
+
 	pub fn store<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
 		let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
 		assert!(k.len() > 0 && v.type_name().len() > 0);

@@ -4,7 +4,7 @@
 [Build Status]: https://travis-ci.com/icbiadb/icbiadb.svg?branch=master
 [travis]: https://travis-ci.com/github/icbiadb/icbiadb
 
-## IcbiaDB | I can't believe it's a database &emsp; [![Build Status]][travis] [![Latest Version]][crates.io]
+## IcbiaDB | I can't believe it's a database &emsp; [![Build Status]][travis] [![Latest Version]][crates.io] Got some problems with crates.io atm, so no new version are published there
 
 
 **Not recommended for production**
@@ -31,8 +31,6 @@ I.e, anything but a database library I've ever heard of, especially in this fine
 
 **Example**
 
-Example
-
 
 ```rust
 use serde::{Serialize, Deserialize};
@@ -52,7 +50,7 @@ fn main() -> std::io::Result<()> {
 	
 	// Store, fetch, update
 	db.store("key:welcome", "Hello World!");
-	let v = db.fetch("key:welcome");
+	let v = db.fetch("key:welcome"); // BvObject
 	println!("{:?} of type {}", v.extract::<String>(), v.type_name());
 
 	db.update("key:welcome", 100);
@@ -159,8 +157,11 @@ Data set: 500000 title: short str, text: first paragraph of "lorem ipsum"
 
 **NOTE**
 
+Coming soon
 
-
+* incr/incrby, decr/decrby functions for incrementing ints or tuple element of ints
+* substr/srange(start, length)
+* More REDIS-inspired stuff
 
 
 ---

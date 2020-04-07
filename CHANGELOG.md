@@ -16,7 +16,6 @@
 * Add Db.swap, replace KV value if serialized byte vec is of equal lengths
 * Memory, all functions now takes &[u8] as parameter instead of strings, the Db layer converts strings to bytes
 * slice::strip_ref_symbols now removes \*const & \*mut as well
-* Remove Db.swap, Db.update will simply swap if they new value is of the same type, or else delete and store new record
 
 
 ### 0.2.1 2020-04-2

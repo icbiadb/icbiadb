@@ -53,6 +53,10 @@ impl BvObject {
 		&self.raw
 	}
 
+	pub fn mut_raw(&mut self) -> &mut ByteVec {
+		&mut self.raw
+	}
+
 	pub fn extract<T: Sized + serde::de::DeserializeOwned>(&self) -> T {
 		self.raw.extract()
 	}
