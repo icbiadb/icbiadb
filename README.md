@@ -34,7 +34,6 @@ I.e, anything but a database library I've ever heard of, especially in this fine
 
 ```rust
 use serde::{Serialize, Deserialize};
-
 use icbiadb::prelude::*;
 
 
@@ -45,37 +44,47 @@ struct Article {
 	text: String,
 }
 
+
+
 fn main() -> std::io::Result<()> {
 	let mut db = icbiadb::mem()?;
 	
-	// Store, fetch, update
-	db.store("key:welcome", "Hello World!");
-	let v = db.fetch("key:welcome"); // BvObject
-	println!("{:?} of type {}", v.extract::<String>(), v.type_name());
+	// set, get, update
+	db.set("key:welcome", "Hello World!");
+	let v = db.get("key:welcome"); // -> BvObject
 
-	db.update("key:welcome", 100);
-	let key_welcome = db.fetch_value::<i32>("key:welcome");
+	// No reason to deserialize values with Db.get_value if they are primitives and meant for 
+	// simple operations like comparison, BvObject will type check and do byte vec stuff or deserialize internally.
+	// Addition, subtraction etc coming soon
+	if v == "Hello World!" || v == 100 {
+		println!("{:?} of type {}", v.extract::<String>(), v.type_name());
+	}
+
+	db.set("key:welcome", 100);
+	let key_welcome = db.get_value::<i32>("key:welcome");
 
 	let article = Article { title: "A title".to_string(), text: "Hello World!".to_string() };
-	db.store("articles:0", &article);
-	db.store("string_key:0", "This string contains \"this is a string\"");
+	db.set("articles:0", &article);
 
-	// Atomic operations on tuples without deserialization
+	// Atomic operations on tuple elements
 	// Requires same type and length though... yet
-	db.store("my_tuple", (100, 100, "hello world!"));
-	db.fetch_rtuple("my_tuple").update(1, 111); // -> (100, 111, "hello world!")
-	db.fetch_rtuple("my_tuple").value::<i32>(1); // -> 111
-	db.fetch_rtuple("my_tuple").update(2, "hello!!!!!!!");
+	db.set("my_tuple", (100, 100, "hello world!"));
+	db.get_tuple("my_tuple").set(1, 111); // -> (100, 111, "hello world!")
+	db.get_tuple("my_tuple").value::<i32>(1); // -> 111
+	db.get_tuple("my_tuple").set(2, "hello!!!!!!!");
 
 	// Seamless string bytes comparison, integers are atm converted natively(from_le_bytes)
-	let articles = db.filter(|(k, v)| {
+	db.filter(|(k, v)| {
 		v.type_name() == "IcbiaDB_tests::Article"
 		|| v.contains("this is a string")
-		|| (v > 100.0 && v < 200.0) && k.starts_with("calculations:")
 	});
 
-	println!("Found {} keys starting with \"key:\"", keys.len());
-	println!("Found {} keys of type \"Article\"", articles.len());
+	db.starts_with("calculations:").iter()
+		.filter(|(k, v)| {
+			k.contains(":super_calc:")
+			&& *v > 100.0 && *v < 200.0
+		})
+		.collect::<Vec<_>>();
 
 	Ok(())
 }
@@ -173,7 +182,7 @@ Coming soon
 Since this is a rather enjoyable project, if my time allows it, I plan to extend it into other languages.
 
 * C ffi, not yet written
-* [icbiadb-py](https://github.com/Grundligt/icbiadb-py)
+* [icbiadb-py](https://github.com/icbiadb/icbiadb-py)
 * Nodejs not written yet, [neon](https://github.com/neon-bindings/neon)
 * Ruby not written yet, [rutie](https://github.com/danielpclark/rutie)
 * Lua not written yet, [rlua](https://github.com/kyren/rlua)

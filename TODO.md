@@ -2,6 +2,7 @@
 ### TODO
 
 
+* Change BvTuple/BvVec.(update, value) to get(index), set and add swap, incr/incrby etc...
 * Data deduplication
 * ~~Implement Bv[Type] wrapper for atomic operations on values(E.g, BvVec[3] == 100 retrieves and bitwise/deserializecompares serialized vectors fourth element, BvString.replace("hello", "hi") changes byte values and resizes)~~ Same type/same length updates have been implemented
 * Cached single-time deserialization for records

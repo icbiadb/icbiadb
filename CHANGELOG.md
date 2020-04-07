@@ -1,6 +1,15 @@
 ## Changelog
 
 
+### 0.2.3
+
+
+* Move Db.update to Db.set
+* Add BvTuple.get(index) -> BvObj
+* Add BvObj, BvStr, BvInt
+* Rename store, fetch -> set, get
+
+
 ### 0.2.2 2020-04-06
 
 
