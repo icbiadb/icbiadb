@@ -1,7 +1,7 @@
-use super::{BvObject, BvStr, BvString, BvInt};
+use super::{BvObj, BvObject, BvStr, BvString, BvInt};
 use crate::slice;
 use crate::normalize_type_name;
-use crate::utils::{serialize_object, deserialize_object, deserialize, is_int};
+use crate::utils::{serialize_object, deserialize, is_int};
 
 
 // 1. Get mut reference from Db,
@@ -68,34 +68,13 @@ impl<'a> BvTuple<'a> {
 		start
 	}
 
-	pub fn get(&self, index: usize) -> BvStr {
-		// TODO
-		// Create Borrowed BvObject and return it
-
+	pub fn get(&'a self, index: usize) -> BvObj<'a> {
 		let r = &self.inner[self.get_start(index)..self.get_start(index)+self.elength[index]];
 
 		if self.type_map[index] == "str" {
-			BvStr::new(&r[8..])
+			BvObj::new(self.type_map[index].as_slice(), r)
 		} else if is_int(self.type_map[index].as_slice()) {
-			match self.type_map[index].as_slice() {
-				// i8-i128
-				[105, 56] => 1,
-				[105, 49, 54] => 2,
-				[105, 51, 50] => 4,
-				[105, 54, 52] => 8,
-				[105, 49, 50, 56] => 16,
-				// u8-u128
-				[117, 56] => 1,
-				[117, 49, 54] => 2,
-				[117, 51, 50] => 4,
-				[117, 54, 52] => 8,
-				[117, 49, 50, 56] => 16,
-				// f32-f64
-				[102, 51, 50] => 4,
-				[102, 54, 52] => 8,
-				_ => { 0 }
-			};
-			BvStr::new(b"int")
+			BvObj::new(self.type_map[index].as_slice(), r)
 		} else {
 			panic!("Failed to implicit cast byte slice to type")
 		}
@@ -106,7 +85,7 @@ impl<'a> BvTuple<'a> {
 		deserialize(&self.inner[start..start+self.elength[index]])
 	}
 
-	pub fn update<T: Sized + serde::Serialize>(&mut self, index: usize, value: T) {
+	pub fn set<T: Sized + serde::Serialize>(&mut self, index: usize, value: T) {
 		let new_value = serialize_object(&value);
 		if self.type_map[index] != new_value.type_name() {
 			panic!("Not the same type")
