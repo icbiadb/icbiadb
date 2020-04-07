@@ -11,7 +11,7 @@ use crate::utils::{serialize_object, deserialize_object, deserialize, is_int};
 #[derive(Debug)]
 pub struct BvTuple<'a>{
 	inner: &'a mut BvObject,
-	indexes: Vec<usize>,
+	elength: Vec<usize>,
 	type_map: Vec<BvString>,
 }
 
@@ -22,11 +22,7 @@ impl<'a> BvTuple<'a> {
 			.map(|r| BvString::from(normalize_type_name(r).to_vec()))
 			.collect::<Vec<_>>();
 
-
-		// TODO
-		// Create Borrowed BvObject
-
-		let mut ele_index = vec![];
+		let mut elength = vec![];
 		for r#type in type_map.iter() {
 			let r = match r#type.as_slice() {
 				// i8-i128
@@ -47,18 +43,18 @@ impl<'a> BvTuple<'a> {
 				// Str
 				[115, 116, 114] => {
 					 // Length of str serialized by bincode, usize(str lengt) + str length
-					 let curr_pos = ele_index.iter().sum();
+					 let curr_pos = elength.iter().sum();
 					8 + deserialize::<usize>(&obj[curr_pos..curr_pos+8])
 				}
 				_ => { panic!("Failed to calculate tuple size") }
 			};
 
-			ele_index.push(r);
+			elength.push(r);
 		}
 
 		BvTuple {
 			inner: obj,
-			indexes: ele_index,
+			elength: elength,
 			type_map: type_map,
 		}
 	}
@@ -66,14 +62,17 @@ impl<'a> BvTuple<'a> {
 	pub fn get_start(&self, index: usize) -> usize {
 		let mut start = 0;
 		for i in 0..index {
-			start += self.indexes[i];
+			start += self.elength[i];
 		}
 
 		start
 	}
 
 	pub fn get(&self, index: usize) -> BvStr {
-		let r = &self.inner[self.get_start(index)..self.get_start(index)+self.indexes[index]];
+		// TODO
+		// Create Borrowed BvObject and return it
+
+		let r = &self.inner[self.get_start(index)..self.get_start(index)+self.elength[index]];
 
 		if self.type_map[index] == "str" {
 			BvStr::new(&r[8..])
@@ -104,7 +103,7 @@ impl<'a> BvTuple<'a> {
 
 	pub fn value<T: serde::de::DeserializeOwned>(&self, index: usize) -> T {
 		let start = self.get_start(index);
-		deserialize(&self.inner[start..start+self.indexes[index]])
+		deserialize(&self.inner[start..start+self.elength[index]])
 	}
 
 	pub fn update<T: Sized + serde::Serialize>(&mut self, index: usize, value: T) {
@@ -113,7 +112,7 @@ impl<'a> BvTuple<'a> {
 			panic!("Not the same type")
 		}
 
-		let length = self.indexes[index];
+		let length = self.elength[index];
 		if length != new_value.len() {
 			panic!("Not the same length, are you nuts?! Overwriting len {} with len {}", length, new_value.len())
 		}

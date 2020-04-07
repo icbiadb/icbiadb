@@ -1,9 +1,9 @@
 use crate::utils::{serialize, serialize_object, normalize_type_name};
 use crate::decl::types::*;
+use crate::types::*;
 use crate::prelude::*;
 use crate::mem::{Memory, MemState};
 use crate::fio::FileIO;
-use crate::types::bv::{BvStr, BvObject};
 use crate::storage::IndexedKvStorage;
 
 
@@ -145,15 +145,6 @@ impl Db {
 		self.memory.contains_key(key.as_ref().as_bytes())
 	}
 
-	pub fn swap<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, key: S, new_val: T) -> BvObject {
-		let new = serialize_object(&new_val);
-		if self.memory[key.as_ref().as_bytes()].type_name() == new.type_name() {
-			return std::mem::replace(&mut self.memory.get_mut(key.as_ref().as_bytes()), new)
-		}
-
-		panic!("Not equal type, key: {}", key.as_ref())
-	}
-
 	pub fn store<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
 		let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
 		assert!(k.len() > 0 && v.type_name().len() > 0);
@@ -201,6 +192,10 @@ impl Db {
 
 	pub fn fetch_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
 		self.memory[key.as_bytes()].extract()
+	}
+
+	pub fn fetch_rtuple<S: AsRef<str>>(&mut self, key: S) -> BvTuple {
+		BvTuple::from(self.memory.get_mut(key.as_ref().as_bytes()))
 	}
 
 	pub fn update<S: AsRef<str>, T: serde::ser::Serialize>(&mut self, k: S, v: T) {
@@ -294,6 +289,8 @@ impl Db {
 	}
 
 	pub fn decl_insert_many<S: AsRef<str>>(&mut self, name: S, mut rows: Vec<DeclarationRecord>) -> Result<(), String> {
+		// TODO
+		// Validate and extend storage
 		for row in rows.drain(0..rows.len()) {
 			self.decl_insert_row(&name, row)?
 		}

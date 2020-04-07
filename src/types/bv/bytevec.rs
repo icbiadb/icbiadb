@@ -7,7 +7,7 @@ use crate::utils::{
 };
 use crate::slice::*;
 
-use super::BvString;
+use super::*;
 
 use std::convert::TryFrom;
 
@@ -225,6 +225,18 @@ impl std::cmp::PartialEq<BvString> for ByteVec {
 
 impl std::cmp::PartialEq<&BvString> for ByteVec {
 	fn eq(&self, other: &&BvString) -> bool {
+		self.as_slice() == other.as_slice()
+	}
+}
+
+impl std::cmp::PartialEq<BvStr<'_>> for ByteVec {
+	fn eq(&self, other: &BvStr<'_>) -> bool {
+		self.as_slice() == other.as_slice()
+	}
+}
+
+impl std::cmp::PartialEq<&BvStr<'_>> for ByteVec {
+	fn eq(&self, other: &&BvStr<'_>) -> bool {
 		self.as_slice() == other.as_slice()
 	}
 }
