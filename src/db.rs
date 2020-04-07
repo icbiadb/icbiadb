@@ -146,8 +146,8 @@ impl Db {
 	}
 
 	pub fn swap<S: AsRef<str>, T: serde::Serialize>(&mut self, key: S, value: T) -> BvObject {
-		let mut new_obj = serialize_object(&value);
-		let mut old_obj = self.memory.get_mut(key.as_ref().as_bytes());
+		let new_obj = serialize_object(&value);
+		let old_obj = self.memory.get_mut(key.as_ref().as_bytes());
 		
 		if new_obj.type_name() == old_obj.type_name() && new_obj.raw().len() == old_obj.raw().len() {
 			let old = std::mem::replace(old_obj, new_obj);
@@ -157,13 +157,27 @@ impl Db {
 		panic!("Not same type or equal length")
 	}
 
-	pub fn store<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
-		let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
-		assert!(k.len() > 0 && v.type_name().len() > 0);
-		self.memory.push_record((k.into(), v));
+	pub fn set<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
+		if self.memory.contains_key(k.as_ref().as_bytes()) {
+			// Update
+			let old = self.memory[k.as_ref().as_bytes()].type_name();
+			let new = serialize_object(&v);
+			if old == new.type_name() {
+				*self.memory.get_mut(k.as_ref().as_bytes()) = new;
+			} else {
+				self.memory.delete_record(k.as_ref().as_bytes());
+				self.set(k, v);
+			}
+		} else {
+			// Create new
+			let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
+			assert!(k.len() > 0 && v.type_name().len() > 0);
+
+			self.memory.push_record((k.into(), v));
+		}
 	}
 
-	pub fn store_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, t: S, v: T) {
+	pub fn set_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, t: S, v: T) {
 		let (k, v) = (
 			k.as_ref().as_bytes(), 
 			BvObject::from_raw(normalize_type_name(t.as_ref().as_bytes()).to_vec(), serialize(&v))
@@ -173,13 +187,13 @@ impl Db {
 		self.memory.push_record((k.into(), v));
 	}
 
-	pub fn store_raw<S: AsRef<str>>(&mut self, k: S, t: S, v: Vec<u8>) {	
+	pub fn set_raw<S: AsRef<str>>(&mut self, k: S, t: S, v: Vec<u8>) {	
 		let (k, v) = (k.as_ref().as_bytes(), BvObject::from_raw(normalize_type_name(t.as_ref().as_bytes()).to_vec(), v));
 		assert!(k.len() > 0 && v.type_name().len() > 0);
 		self.memory.push_record((k.into(), v));
 	}
 
-	pub fn store_many<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, values: &Vec<(S, T)>) {
+	pub fn set_many<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, values: &Vec<(S, T)>) {
 		for (k, v) in values {
 			let (k, v) = (k.as_ref().as_bytes(), serialize_object(&v));
 			assert!(k.len() > 0 && v.type_name().len() > 0);
@@ -187,7 +201,7 @@ impl Db {
 		}
 	}
 
-	pub fn store_many_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, values: &Vec<(S, S, T)>) {
+	pub fn set_many_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, values: &Vec<(S, S, T)>) {
 		for (k, t, v) in values {
 			let (k, v) = (
 				k.as_ref().as_bytes(), 
@@ -198,27 +212,16 @@ impl Db {
 		}
 	}
 
-	pub fn fetch<S: AsRef<str>>(&self, key: S) -> &BvObject {
+	pub fn get<S: AsRef<str>>(&self, key: S) -> &BvObject {
 		&self.memory[key.as_ref().as_bytes()]
 	}
 
-	pub fn fetch_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
+	pub fn get_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
 		self.memory[key.as_bytes()].extract()
 	}
 
-	pub fn fetch_rtuple<S: AsRef<str>>(&mut self, key: S) -> BvTuple {
+	pub fn get_tuple<S: AsRef<str>>(&mut self, key: S) -> BvTuple {
 		BvTuple::from(self.memory.get_mut(key.as_ref().as_bytes()))
-	}
-
-	pub fn update<S: AsRef<str>, T: serde::ser::Serialize>(&mut self, k: S, v: T) {
-		let old = self.memory[k.as_ref().as_bytes()].type_name();
-		let new = serialize_object(&v);
-		if old == new.type_name() {
-			*self.memory.get_mut(k.as_ref().as_bytes()) = new;
-		} else {
-			self.memory.delete_record(k.as_ref().as_bytes());
-			self.store(k, v);
-		}
 	}
 
 	pub fn remove<S: AsRef<str>>(&mut self, key: S) {
