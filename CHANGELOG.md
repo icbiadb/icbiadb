@@ -4,9 +4,9 @@
 ### 0.2.3
 
 
-* Move Db.update to Db.set
 * Add BvTuple.get(index) -> BvObj
 * Add BvObj, BvStr, BvInt
+* Move Db.update to Db.set
 * Rename store, fetch -> set, get
 
 
