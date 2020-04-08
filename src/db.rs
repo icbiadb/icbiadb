@@ -162,7 +162,7 @@ impl Db {
 			// Update
 			let old = self.memory[k.as_ref().as_bytes()].type_name();
 			let new = serialize_object(&v);
-			if old == new.type_name() {
+			if old == new.type_name() && old.inner().len() == new.inner().len() {
 				*self.memory.get_mut(k.as_ref().as_bytes()) = new;
 			} else {
 				self.memory.delete_record(k.as_ref().as_bytes());
