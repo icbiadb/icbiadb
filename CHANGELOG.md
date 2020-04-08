@@ -4,6 +4,7 @@
 ### 0.2.3
 
 
+* Length check in Db.set
 * Add BvTuple.get(index) -> BvObj
 * Add BvObj, BvStr, BvInt
 * Move Db.update to Db.set

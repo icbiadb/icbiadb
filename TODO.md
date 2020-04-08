@@ -3,7 +3,7 @@
 
 
 * Operations requiring resize on tuples/vec?
-* Data deduplication
+* Data deduplication?
 * Cached single-time deserialization for records
 * Nicer error-handling/more helpful panics
 * Redeclare declarations, add/remove columns, rename, change types, return records that don't fit the changes for deletion/updating(Might be useful later, if a script language is ever created for some db stuff or something)
@@ -48,4 +48,8 @@
 
 
 ---
+
+
+
+
 
