@@ -7,9 +7,6 @@ use crate::utils::{
 };
 
 
-use std::convert::TryFrom;
-
-
 use super::{ByteVec, BvString};
 
 
@@ -22,7 +19,6 @@ pub struct BvObject {
 }
 
 impl BvObject {
-
 	pub fn from<T: Sized + serde::ser::Serialize>(o: T) -> Self {
 		BvObject{
 			type_name: normalize_type_name(std::any::type_name::<T>().as_bytes()).into(),
@@ -104,50 +100,6 @@ impl BvObject {
 
 	pub fn as_slice(&self) -> &[u8] {
 		self.raw.as_slice()
-	}
-
-	pub fn as_usize(&self) -> usize {
-		usize::from_le_bytes(<[u8; 8]>::try_from(&self.raw[..8]).unwrap())
-	}
-
-	pub fn as_u16(&self) -> u16 {
-		u16::from_le_bytes(<[u8; 2]>::try_from(&self.raw[..2]).unwrap())
-	}
-
-	pub fn as_u32(&self) -> u32 {
-		u32::from_le_bytes(<[u8; 4]>::try_from(&self.raw[..4]).unwrap())
-	}
-
-	pub fn as_u64(&self) -> u64 {
-		u64::from_le_bytes(<[u8; 8]>::try_from(&self.raw[..8]).unwrap())
-	}
-
-	pub fn as_u128(&self) -> u128 {
-		u128::from_le_bytes(<[u8; 16]>::try_from(&self.raw[..16]).unwrap())
-	}
-
-	pub fn as_i16(&self) -> i16 {
-		i16::from_le_bytes(<[u8; 2]>::try_from(&self.raw[..2]).unwrap())
-	}
-
-	pub fn as_i32(&self) -> i32 {
-		i32::from_le_bytes(<[u8; 4]>::try_from(&self.raw[..4]).unwrap())
-	}
-
-	pub fn as_i64(&self) -> i64 {
-		i64::from_le_bytes(<[u8; 8]>::try_from(&self.raw[..8]).unwrap())
-	}
-
-	pub fn as_i128(&self) -> i128 {
-		i128::from_le_bytes(<[u8; 16]>::try_from(&self.raw[..16]).unwrap())
-	}
-
-	pub fn as_f32(&self) -> f32 {
-		f32::from_le_bytes(<[u8; 4]>::try_from(&self.raw[..4]).unwrap())
-	}
-
-	pub fn as_f64(&self) -> f64 {
-		f64::from_le_bytes(<[u8; 8]>::try_from(&self.raw[..8]).unwrap())
 	}
 }
 
@@ -282,10 +234,6 @@ impl PartialEq<&String> for BvObject {
 		self.is_str() && &self.raw[8..] == other.as_bytes()
 	}
 }
-
-// TODO
-// Byte comparison and such instead
-
 
 
 impl PartialEq<i16> for BvObject {
@@ -520,8 +468,11 @@ impl PartialOrd<f64> for BvObject {
 }
 
 
-
-
+impl PartialEq<i8> for &BvObject {
+	fn eq(&self, other: &i8) -> bool {
+		self.is_int() && self.raw.as_i8() == *other
+	}
+}
 
 impl PartialEq<i16> for &BvObject {
 	fn eq(&self, other: &i16) -> bool {

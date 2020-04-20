@@ -1,4 +1,4 @@
-use super::{BvObj, BvObject, BvStr, BvString, BvInt};
+use super::{BvObj, BvObject, BvString};
 use crate::slice;
 use crate::normalize_type_name;
 use crate::utils::{serialize_object, deserialize, is_int};

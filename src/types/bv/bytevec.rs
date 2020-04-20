@@ -51,6 +51,10 @@ impl ByteVec {
 		usize::from_le_bytes(<[u8; 8]>::try_from(&self[..8]).unwrap())
 	}
 
+	pub fn as_u8(&self) -> u8 {
+		self[0]
+	}
+
 	pub fn as_u16(&self) -> u16 {
 		u16::from_le_bytes(<[u8; 2]>::try_from(&self[..2]).unwrap())
 	}
@@ -65,6 +69,10 @@ impl ByteVec {
 
 	pub fn as_u128(&self) -> u128 {
 		u128::from_le_bytes(<[u8; 16]>::try_from(&self[..16]).unwrap())
+	}
+
+	pub fn as_i8(&self) -> i8 {
+		i8::from_le_bytes(<[u8; 1]>::try_from(&self[..1]).unwrap())
 	}
 
 	pub fn as_i16(&self) -> i16 {
