@@ -139,7 +139,7 @@ impl KvInterface for IndexedKvStorage {
 		self.inner[&key[0]].push((key.to_vec(), v));
 	}
 
-	fn insert_many(&mut self, records: Vec<(Vec<u8>, BvObject)>) {
+	fn insert_many(&mut self, _records: Vec<(Vec<u8>, BvObject)>) {
 		// TODO
 		// Filter by first key, then extend
 	}
