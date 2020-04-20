@@ -40,7 +40,7 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
 		self.kv_records.len()
 	}
 
-	pub fn contains_key(&self, key: &[u8]) -> bool {
+	pub fn has_key(&self, key: &[u8]) -> bool {
 		self.kv_records.has_key(key)
 	}
 
@@ -83,8 +83,8 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
 		self.kv_records.insert(r.0.to_vec(), r.1);
 	}
 
-	pub fn delete_record(&mut self, key: &[u8]) {
-		let _r = &self.kv_records.remove(key);
+	pub fn delete_record(&mut self, key: &[u8]) -> BvObject {
+		self.kv_records.remove(key)
 	}
 
 	pub fn decls(&self) -> &DeclarationMap {
