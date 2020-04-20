@@ -47,6 +47,4 @@ pub fn mem() -> std::io::Result<db::Db> {
 	db::Db::mem()
 }
 
-pub fn write_only<S: AsRef<str>>(file_name: S) -> std::io::Result<db::Db> {
-	db::Db::write_only(file_name)
-}
+

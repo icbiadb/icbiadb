@@ -8,8 +8,6 @@ use crate::storage::IndexedKvStorage;
 
 
 
-
-
 enum DbType {
 	InMemory,
 	File,
@@ -90,25 +88,6 @@ impl Db {
 		})
 	}
 
-	pub fn write_only<S: AsRef<str>>(file_name: S) -> std::io::Result<Self> {
-		let f = std::fs::OpenOptions::new()
-			.write(true)
-			.create(true)
-			.read(true)
-			.open(file_name.as_ref())?;
-
-		let f_io = FileIO::new(f);
-		let mut memory = Memory::new(MemState::WriteOnly);
-		f_io.read_to(&mut memory)?;
-		
-		Ok(Db {
-			file_name: file_name.as_ref().to_string(),
-			f_io: Some(f_io),
-			memory: memory,
-			r#type: DbType::File,
-		})	
-	}
-
 	pub fn file_name(&self) -> &str {
 		self.file_name.as_str()
 	}
@@ -142,9 +121,109 @@ impl Db {
 	}
 
 	pub fn has_key<S: AsRef<str>>(&self, key: S) -> bool {
-		self.memory.contains_key(key.as_ref().as_bytes())
+		self.memory.has_key(key.as_ref().as_bytes())
 	}
 
+	pub fn incr<S: AsRef<str>>(&mut self, key: S) {
+		if self.has_key(key.as_ref()) {
+			let v = self.get(key.as_ref());
+			if v.is_int() || v.is_uint() || v.is_float() {
+				match v.type_name().as_str() {
+					"i8" => self.set(key, v.extract::<i8>() + 1),
+					"i16" => self.set(key, v.extract::<i16>() + 1),
+					"i32" => self.set(key, v.extract::<i32>() + 1),
+					"i64" => self.set(key, v.extract::<i64>() + 1),
+					"i128" => self.set(key, v.extract::<i128>() + 1),
+					"u8" => self.set(key, v.extract::<u8>() + 1),
+					"u16" => self.set(key, v.extract::<u16>() + 1),
+					"u32" => self.set(key, v.extract::<u32>() + 1),
+					"u64" => self.set(key, v.extract::<u64>() + 1),
+					"u128" => self.set(key, v.extract::<u128>() + 1),
+					"f32" => self.set(key, v.extract::<f32>() + 1.0),
+					"f64" => self.set(key, v.extract::<f64>() + 1.0),
+					_ => { panic!("Something went wrong") }
+				}
+			}
+		} else {
+			self.set(key, 1 as isize);
+		}
+	}
+
+	pub fn incr_by<S: AsRef<str>>(&mut self, key: S) {
+		if self.has_key(key.as_ref()) {
+			let v = self.get(key.as_ref());
+			if v.is_int() || v.is_uint() || v.is_float() {
+				match v.type_name().as_str() {
+					"i8" => self.set(key, v.extract::<i8>() + 1),
+					"i16" => self.set(key, v.extract::<i16>() + 1),
+					"i32" => self.set(key, v.extract::<i32>() + 1),
+					"i64" => self.set(key, v.extract::<i64>() + 1),
+					"i128" => self.set(key, v.extract::<i128>() + 1),
+					"u8" => self.set(key, v.extract::<u8>() + 1),
+					"u16" => self.set(key, v.extract::<u16>() + 1),
+					"u32" => self.set(key, v.extract::<u32>() + 1),
+					"u64" => self.set(key, v.extract::<u64>() + 1),
+					"u128" => self.set(key, v.extract::<u128>() + 1),
+					"f32" => self.set(key, v.extract::<f32>() + 1.0),
+					"f64" => self.set(key, v.extract::<f64>() + 1.0),
+					_ => { panic!("Something went wrong") }
+				}
+			}
+		} else {
+			self.set(key, 1 as isize);
+		}
+	}
+
+	pub fn decr<S: AsRef<str>>(&mut self, key: S) {
+		if self.has_key(key.as_ref()) {
+			let v = self.get(key.as_ref());
+			if v.is_int() || v.is_uint() || v.is_float() {
+				match v.type_name().as_str() {
+					"i8" => self.set(key, v.extract::<i8>() - 1),
+					"i16" => self.set(key, v.extract::<i16>() - 1),
+					"i32" => self.set(key, v.extract::<i32>() - 1),
+					"i64" => self.set(key, v.extract::<i64>() - 1),
+					"i128" => self.set(key, v.extract::<i128>() - 1),
+					"u8" => self.set(key, v.extract::<u8>() - 1),
+					"u16" => self.set(key, v.extract::<u16>() - 1),
+					"u32" => self.set(key, v.extract::<u32>() - 1),
+					"u64" => self.set(key, v.extract::<u64>() - 1),
+					"u128" => self.set(key, v.extract::<u128>() - 1),
+					"f32" => self.set(key, v.extract::<f32>() - 1.0),
+					"f64" => self.set(key, v.extract::<f64>() - 1.0),
+					_ => { panic!("Something went wrong") }
+				}
+			}
+		} else {
+			self.set(key, 1 as isize);
+		}
+	}
+
+	pub fn decr_by<S: AsRef<str>>(&mut self, key: S) {
+		if self.has_key(key.as_ref()) {
+			let v = self.get(key.as_ref());
+			if v.is_int() || v.is_uint() || v.is_float() {
+				match v.type_name().as_str() {
+					"i8" => self.set(key, v.extract::<i8>() - 1),
+					"i16" => self.set(key, v.extract::<i16>() - 1),
+					"i32" => self.set(key, v.extract::<i32>() - 1),
+					"i64" => self.set(key, v.extract::<i64>() - 1),
+					"i128" => self.set(key, v.extract::<i128>() - 1),
+					"u8" => self.set(key, v.extract::<u8>() - 1),
+					"u16" => self.set(key, v.extract::<u16>() - 1),
+					"u32" => self.set(key, v.extract::<u32>() - 1),
+					"u64" => self.set(key, v.extract::<u64>() - 1),
+					"u128" => self.set(key, v.extract::<u128>() - 1),
+					"f32" => self.set(key, v.extract::<f32>() - 1.0),
+					"f64" => self.set(key, v.extract::<f64>() - 1.0),
+					_ => { panic!("Something went wrong") }
+				}
+			}
+		} else {
+			self.set(key, 1 as isize);
+		}
+	}
+	
 	pub fn swap<S: AsRef<str>, T: serde::Serialize>(&mut self, key: S, value: T) -> BvObject {
 		let new_obj = serialize_object(&value);
 		let old_obj = self.memory.get_mut(key.as_ref().as_bytes());
@@ -158,7 +237,7 @@ impl Db {
 	}
 
 	pub fn set<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, k: S, v: T) {
-		if self.memory.contains_key(k.as_ref().as_bytes()) {
+		if self.memory.has_key(k.as_ref().as_bytes()) {
 			// Update
 			let old = self.memory[k.as_ref().as_bytes()].type_name();
 			let new = serialize_object(&v);
@@ -224,8 +303,8 @@ impl Db {
 		BvTuple::from(self.memory.get_mut(key.as_ref().as_bytes()))
 	}
 
-	pub fn remove<S: AsRef<str>>(&mut self, key: S) {
-		self.memory.delete_record(key.as_ref().as_bytes());
+	pub fn remove<S: AsRef<str>>(&mut self, key: S) -> BvObject {
+		self.memory.delete_record(key.as_ref().as_bytes())
 	}
 
 	pub fn commit(&mut self) -> std::io::Result<()> {
