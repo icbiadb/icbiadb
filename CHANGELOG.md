@@ -4,6 +4,7 @@
 ### 0.2.3
 
 
+* Db.decl_insert_many now extends instead of draining and using Db.decl_insert_row
 * Add Db.incr, decr, incr_by, decr_by
 * Add BvTuple.get(index) -> BvObj
 * Add BvObj, BvStr, BvInt

@@ -13,7 +13,7 @@
 [Changelog](https://github.com/icbiadb/icbiadb/blob/master/CHANGELOG.md)
 
 
-IcbiaDB is a simple headless Key-Value & data structures database with support for storing most types seamlessly. Compared to some other KV databases, IcbiaDB supports partial key searches and soon, atomic operations without serialization, allowing for rather fast ...stuff, on big data sets.
+IcbiaDB is a simple embedded Key-Value & data structures database with support for storing most types seamlessly. Compared to some other KV databases, IcbiaDB supports partial key searches and soon, atomic operations without serialization, allowing for rather fast ...stuff, on big data sets.
 
 The basic goal though, is merely a quick and dirty relatively reliable database with minimal preperation, minimal dependencies and decent performence on low-end computers and also the ability to seamlessly store, manipulate and present primitives and dynamic structures without too much hassle. Oh, and it comes with a free beer.
 
