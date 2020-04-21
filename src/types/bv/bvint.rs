@@ -1,7 +1,7 @@
 
 
 pub struct BvInt<'a> {
-	inner: &'a [u8],
+	_inner: &'a [u8],
 }
 
 

@@ -18,6 +18,7 @@
 **IndexedKvStructure**
 
 * Key separator seperated multi-indexing for IndexedKvStructure(up to 6 keys or something) 
+* Impl insert_many
 
 
 **Macros**

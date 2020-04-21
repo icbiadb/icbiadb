@@ -28,7 +28,15 @@ mod fio;
 
 pub use db::Db;
 pub use decl::types::DeclarationRecord;
-pub use utils::{serialize, deserialize, serialize_object, deserialize_object, serialize_to_bytevec, deserialize_bytevec, normalize_type_name};
+pub use utils::{
+	normalize_type_name,
+	serialize, 
+	serialize_object, 
+	serialize_to_bytevec, 
+	deserialize, 
+	deserialize_object, 
+	deserialize_bytevec, 
+};
 
 
 pub fn create<S: AsRef<str>>(file_name: S) -> std::io::Result<db::Db> {

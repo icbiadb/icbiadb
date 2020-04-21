@@ -49,7 +49,7 @@ struct Article {
 fn main() -> std::io::Result<()> {
 	let mut db = icbiadb::mem()?;
 	
-	// set, get, update
+	// set, get
 	db.set("key:welcome", "Hello World!");
 	let v = db.get("key:welcome"); // -> BvObject
 
@@ -62,6 +62,10 @@ fn main() -> std::io::Result<()> {
 
 	db.set("key:welcome", 100);
 	let key_welcome = db.get_value::<i32>("key:welcome");
+
+	if db.get("visited") == true {
+		db.incr("visitors");
+	}
 
 	let article = Article { title: "A title".to_string(), text: "Hello World!".to_string() };
 	db.set("articles:0", &article);

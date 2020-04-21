@@ -126,7 +126,7 @@ impl Db {
 
 	pub fn incr<S: AsRef<str>>(&mut self, key: S) {
 		if self.has_key(key.as_ref()) {
-			let v = self.get(key.as_ref());
+			let v = self.get(key.as_ref()).clone();
 			if v.is_int() || v.is_uint() || v.is_float() {
 				match v.type_name().as_str() {
 					"i8" => self.set(key, v.extract::<i8>() + 1),
@@ -149,34 +149,23 @@ impl Db {
 		}
 	}
 
-	pub fn incr_by<S: AsRef<str>>(&mut self, key: S) {
+	pub fn incr_by<S, T>(&mut self, key: S, val: T) 
+		where S: AsRef<str>,
+			T: serde::ser::Serialize + serde::de::DeserializeOwned + std::ops::Add,
+			<T as std::ops::Add>::Output: serde::ser::Serialize {
 		if self.has_key(key.as_ref()) {
-			let v = self.get(key.as_ref());
+			let v = self.get(key.as_ref()).clone();
 			if v.is_int() || v.is_uint() || v.is_float() {
-				match v.type_name().as_str() {
-					"i8" => self.set(key, v.extract::<i8>() + 1),
-					"i16" => self.set(key, v.extract::<i16>() + 1),
-					"i32" => self.set(key, v.extract::<i32>() + 1),
-					"i64" => self.set(key, v.extract::<i64>() + 1),
-					"i128" => self.set(key, v.extract::<i128>() + 1),
-					"u8" => self.set(key, v.extract::<u8>() + 1),
-					"u16" => self.set(key, v.extract::<u16>() + 1),
-					"u32" => self.set(key, v.extract::<u32>() + 1),
-					"u64" => self.set(key, v.extract::<u64>() + 1),
-					"u128" => self.set(key, v.extract::<u128>() + 1),
-					"f32" => self.set(key, v.extract::<f32>() + 1.0),
-					"f64" => self.set(key, v.extract::<f64>() + 1.0),
-					_ => { panic!("Something went wrong") }
-				}
+				self.set(key, v.extract::<T>() + val);
 			}
 		} else {
-			self.set(key, 1 as isize);
+			self.set(key, val);
 		}
 	}
 
 	pub fn decr<S: AsRef<str>>(&mut self, key: S) {
 		if self.has_key(key.as_ref()) {
-			let v = self.get(key.as_ref());
+			let v = self.get(key.as_ref()).clone();
 			if v.is_int() || v.is_uint() || v.is_float() {
 				match v.type_name().as_str() {
 					"i8" => self.set(key, v.extract::<i8>() - 1),
@@ -199,28 +188,17 @@ impl Db {
 		}
 	}
 
-	pub fn decr_by<S: AsRef<str>>(&mut self, key: S) {
+	pub fn decr_by<S, T>(&mut self, key: S, val: T) 
+		where S: AsRef<str>,
+			T: serde::ser::Serialize + serde::de::DeserializeOwned + std::ops::Sub,
+			<T as std::ops::Sub>::Output: serde::ser::Serialize {
 		if self.has_key(key.as_ref()) {
-			let v = self.get(key.as_ref());
+			let v = self.get(key.as_ref()).clone();
 			if v.is_int() || v.is_uint() || v.is_float() {
-				match v.type_name().as_str() {
-					"i8" => self.set(key, v.extract::<i8>() - 1),
-					"i16" => self.set(key, v.extract::<i16>() - 1),
-					"i32" => self.set(key, v.extract::<i32>() - 1),
-					"i64" => self.set(key, v.extract::<i64>() - 1),
-					"i128" => self.set(key, v.extract::<i128>() - 1),
-					"u8" => self.set(key, v.extract::<u8>() - 1),
-					"u16" => self.set(key, v.extract::<u16>() - 1),
-					"u32" => self.set(key, v.extract::<u32>() - 1),
-					"u64" => self.set(key, v.extract::<u64>() - 1),
-					"u128" => self.set(key, v.extract::<u128>() - 1),
-					"f32" => self.set(key, v.extract::<f32>() - 1.0),
-					"f64" => self.set(key, v.extract::<f64>() - 1.0),
-					_ => { panic!("Something went wrong") }
-				}
+				self.set(key, v.extract::<T>() - val);
 			}
 		} else {
-			self.set(key, 1 as isize);
+			self.set(key, val);
 		}
 	}
 	
@@ -229,8 +207,7 @@ impl Db {
 		let old_obj = self.memory.get_mut(key.as_ref().as_bytes());
 		
 		if new_obj.type_name() == old_obj.type_name() && new_obj.raw().len() == old_obj.raw().len() {
-			let old = std::mem::replace(old_obj, new_obj);
-			return old;
+			return std::mem::replace(old_obj, new_obj);
 		}
 
 		panic!("Not same type or equal length")
@@ -401,7 +378,7 @@ impl Db {
 
 impl BytesFilter for Db {
 	fn filter<F>(&self, cb: F) -> Vec<(BvStr, &BvObject)> where F: Fn((BvStr, &BvObject)) -> bool {
-		(&self.memory.kv_records()).into_iter()
+		self.memory.kv_records().into_iter()
 			.filter_map(|(k, v)| {
 				if cb((BvStr::from(k), v)) { return Some((BvStr::from(k), v)) } 
 				None
@@ -415,7 +392,7 @@ impl BytesFilter for Db {
 impl BytesSearch for Db {
 	fn starts_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
 		let k_part = key_part.as_ref().as_bytes();
-		(&self.memory.kv_records()).into_iter()
+		self.memory.kv_records().into_iter()
 			.filter_map(|(k, v)| {
 				if k.starts_with(k_part) {
 					return Some((BvStr::from(k), v))
@@ -427,7 +404,7 @@ impl BytesSearch for Db {
 	}
 
 	fn ends_with<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
-		(&self.memory.kv_records()).into_iter()
+		self.memory.kv_records().into_iter()
 			.filter_map(|(k, v)| {
 				let k = BvStr::from(k);
 				if k.ends_with(key_part.as_ref().as_bytes()) {
@@ -440,7 +417,7 @@ impl BytesSearch for Db {
 	}
 
 	fn contains<S: AsRef<str>>(&self, key_part: S) -> Vec<(BvStr, &BvObject)> {
-		(&self.memory.kv_records()).into_iter()
+		self.memory.kv_records().into_iter()
 			.filter_map(|(k, v)| {
 				let k = BvStr::from(k);
 				if k.contains(key_part.as_ref()) {

@@ -196,7 +196,6 @@ impl std::fmt::Display for BvObject {
 }
 
 
-
 impl PartialEq<BvObject> for BvObject {
 	fn eq(&self, other: &BvObject) -> bool {
 		self.raw == other.as_slice()
@@ -206,6 +205,17 @@ impl PartialEq<BvObject> for BvObject {
 impl PartialEq<&BvObject> for BvObject {
 	fn eq(&self, other: &&BvObject) -> bool {
 		self.raw == other.as_slice()
+	}
+}
+
+
+impl PartialEq<bool> for &BvObject {
+	fn eq(&self, other: &bool) -> bool {
+		if *other {
+			self.raw[0] == 1
+		} else {
+			self.raw[0] == 0
+		}
 	}
 }
 

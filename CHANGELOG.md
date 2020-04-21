@@ -4,11 +4,16 @@
 ### 0.2.3
 
 
-* Length check in Db.set
+* Add Db.incr, decr, incr_by, decr_by
 * Add BvTuple.get(index) -> BvObj
 * Add BvObj, BvStr, BvInt
+* Add ByteVec i8, u8 conversion
 * Move Db.update to Db.set
 * Rename store, fetch -> set, get
+* Remove Db::write_only
+* Db.remove now returns the removed element
+* Db.set now checks byte vec length for fast value replace, else remove and insert new value
+* Impl BvObject.PartialEq bool
 
 
 ### 0.2.2 2020-04-06
