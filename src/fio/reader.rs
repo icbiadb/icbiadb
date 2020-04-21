@@ -91,7 +91,7 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 
 	pub fn read_header(&mut self) -> std::io::Result<Header> {
 		let header: Header = {
-			let mut hbuf = [0u8; std::mem::size_of::<Header>()];
+			let mut hbuf = [0u8; std::mem::size_of::<Header>() - 4]; // For some reason, sizeof Header is larger than u32+u64*2(20 vs 24)
 			self.reader.read_exact(&mut hbuf)?;
 			deserialize(&hbuf)
 		};
