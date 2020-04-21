@@ -120,6 +120,10 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
 	pub fn get_decl_records(&self, name: &[u8]) -> &Vec<DeclarationRecord> {
 		&self.decl_records.get(name).expect(&format!("No entry found for key {:?}", name.as_ref()))
 	}
+
+	pub fn get_decl_records_mut(&mut self, name: &[u8]) -> &mut Vec<DeclarationRecord> {
+		self.decl_records.get_mut(name).expect(&format!("No entry found for key {:?}", name.as_ref()))
+	}
 }
 
 
