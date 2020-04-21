@@ -359,17 +359,9 @@ impl Db {
 		Ok(())
 	}
 
-	pub fn decl_insert_many<S: AsRef<str>>(&mut self, name: S, mut rows: Vec<DeclarationRecord>) -> Result<(), String> {
+	pub fn decl_insert_many<S: AsRef<str>>(&mut self, name: S, rows: Vec<DeclarationRecord>) -> Result<(), String> {
 		let field_map = self.memory.get_field_map(&name.as_ref().as_bytes()).clone();
-		let mut records = self.memory.get_decl_records_mut(name.as_ref().as_bytes());
-		let unique_fields: Vec<Vec<u8>> = field_map.iter()
-			.filter_map(|(k, v)| {
-				if v.contains_key("unique".as_bytes()) {
-					return Some(k.to_vec())
-				} else { None }
-			})
-			.collect();
-
+		let records = self.memory.get_decl_records_mut(name.as_ref().as_bytes());
 
 		for row in rows.iter() {
 			for (k, v) in field_map.iter() {
