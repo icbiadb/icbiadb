@@ -32,9 +32,6 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 
 	pub fn read_to<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>>(&mut self, memory: &mut Memory<KV>) -> std::io::Result<()> {
 		// TODO, move data initialization for memory upward in the function call stack
-		#[cfg(test)]
-		let time = std::time::Instant::now();
-
 		if let Ok(buf) = self.reader.fill_buf() {
 			// Empty file
 			if buf.len() == 0 {
@@ -43,9 +40,6 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 		}
 
 		let header = self.read_header()?;
-		#[cfg(test)]
-		debug!("{:?}", header);
-
 
 		// TODO
 		// For some reason, reading the header reads 40 bytes, while writing 36 bytes(u32 + u128*2)

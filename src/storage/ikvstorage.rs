@@ -233,7 +233,7 @@ impl<'a> std::iter::Iterator for IndexedKvStorageIter<'a> {
 	fn next(&mut self) -> Option<Self::Item> {
 		let mut item = None;
 
-		if self.index < self.inner[self.key_part].1.len() {
+		if self.inner.len() > self.key_part && self.index < self.inner[self.key_part].1.len() {
 			item = Some(&self.inner[self.key_part].1[self.index]);
 			self.index += 1;
 		} else {
