@@ -81,14 +81,6 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
 
 			hm
 		};
-
-
-		#[cfg(test)]
-		debug!("Loaded {} Declarations, {} KV records, {} Declared records in {:?}",
-			declarations.len(), 
-			kv_records.len(), 
-			decl_records.values().map(|v| v.len()).sum::<usize>(),
-			time.elapsed());
 		
 		*memory.decl_get_mut() = declarations;
 		*memory.kv_records_get_mut() = kv_records;
