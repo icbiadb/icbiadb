@@ -15,6 +15,8 @@
 * Db.remove now returns the removed element
 * Db.set now checks byte vec length for fast value replace, else remove and insert new value
 * Impl BvObject.PartialEq bool
+* Fix crash when committing an empty db
+* Fix error result when committing with a file name
 
 
 ### 0.2.2 2020-04-06

@@ -285,20 +285,22 @@ impl Db {
 	}
 
 	pub fn commit(&mut self) -> std::io::Result<()> {
-		if !self.file_name.is_empty() {
-			let f = std::fs::OpenOptions::new()
-				.write(true)
-				.read(true)
-				.create(true)
-				.truncate(true)
-				.open(&self.file_name)?;
-
-			self.f_io = Some(FileIO::new(f));
-			self.r#type = DbType::File;
-			self.f_io.as_mut().unwrap().dump_mem::<IndexedKvStorage>(&self.memory).unwrap()
+		if self.file_name.is_empty() {
+			return Err(std::io::Error::new(std::io::ErrorKind::Other, "File name not set, are you using a memory database?"))
 		}
 
-		Err(std::io::Error::new(std::io::ErrorKind::Other, "File name not set, are you using a memory database?"))
+		let f = std::fs::OpenOptions::new()
+			.write(true)
+			.read(true)
+			.create(true)
+			.truncate(true)
+			.open(&self.file_name)?;
+
+		self.f_io = Some(FileIO::new(f));
+		self.r#type = DbType::File;
+		self.f_io.as_mut().unwrap().dump_mem::<IndexedKvStorage>(&self.memory).unwrap();
+
+		Ok(())
 	}
 
 	pub fn has_decl<S: AsRef<str>>(&self, name: S) -> bool {
