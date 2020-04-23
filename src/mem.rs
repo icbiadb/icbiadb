@@ -69,17 +69,6 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
 	}
 
 	pub fn push_record(&mut self, r: (BvString, BvObject)) {
-		if MemState::WriteOnly == self.state {
-			self.kv_records.insert(r.0.to_vec(), r.1);
-			return
-		}
-
-		/*
-		if self.kv_records.contains_key(r.0.as_slice()) {
-			self.delete_record(self.index_of_key(r.0.as_slice()))
-		}
-		*/
-
 		self.kv_records.insert(r.0.to_vec(), r.1);
 	}
 
