@@ -2,7 +2,7 @@ use crate::utils::{serialize, serialize_object, normalize_type_name};
 use crate::decl::types::*;
 use crate::types::*;
 use crate::prelude::*;
-use crate::mem::{Memory};
+use crate::mem::Memory;
 use crate::fio::FileIO;
 use crate::storage::IndexedKvStorage;
 
@@ -218,11 +218,12 @@ impl Db {
 			// Update
 			let old = self.memory[k.as_ref().as_bytes()].type_name();
 			let new = serialize_object(&v);
-			if old == new.type_name() && old.inner().len() == new.inner().len() {
+
+			if old.inner().len() == new.inner().len() {
 				*self.memory.get_mut(k.as_ref().as_bytes()) = new;
 			} else {
 				self.memory.delete_record(k.as_ref().as_bytes());
-				self.set(k, v);
+				self.memory.push_record((k.as_ref().into(), new));
 			}
 		} else {
 			// Create new

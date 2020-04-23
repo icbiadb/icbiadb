@@ -1,5 +1,5 @@
 use crate::decl::types::*;
-use crate::types::bv::{BvString, BvObject};
+use crate::types::bv::{BvObject};
 use crate::storage::KvInterface;
 
 
@@ -61,8 +61,8 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
 		&self.decl_records
 	}
 
-	pub fn push_record(&mut self, r: (BvString, BvObject)) {
-		self.kv_records.insert(r.0.to_vec(), r.1);
+	pub fn push_record(&mut self, r: (Vec<u8>, BvObject)) {
+		self.kv_records.insert(r.0, r.1);
 	}
 
 	pub fn delete_record(&mut self, key: &[u8]) -> BvObject {
@@ -122,20 +122,4 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> std::ops::IndexM
 		self.kv_records.get_mut(index)
 	}
 }
-
-/*
-impl<K, V> std::ops::Deref for Memory<K, V> {
-	type Target = std::collections::HashMap<Vec<u8>, BvObject>;
-
-	fn deref(&self) -> &Self::Target {
-		&self.kv_records
-	}
-}
-
-impl std::ops::DerefMut for Memory {
-	fn deref_mut(&mut self) -> &mut Self::Target {
-		&mut self.kv_records
-	}
-}
-*/
 
