@@ -2,7 +2,7 @@ use crate::utils::{serialize, serialize_object, normalize_type_name};
 use crate::decl::types::*;
 use crate::types::*;
 use crate::prelude::*;
-use crate::mem::{Memory, MemState};
+use crate::mem::{Memory};
 use crate::fio::FileIO;
 use crate::storage::IndexedKvStorage;
 
@@ -29,7 +29,7 @@ impl Db {
 			.open(file_name.as_ref())?;
 
 		let f_io = FileIO::new(f);
-		let mut memory = Memory::new(MemState::ReadWrite);
+		let mut memory = Memory::new();
 		f_io.read_to(&mut memory)?;
 		
 		
@@ -48,7 +48,7 @@ impl Db {
 			.open(file_name.as_ref())?;
 
 		let f_io = FileIO::new(f);
-		let mut memory = Memory::new(MemState::ReadWrite);
+		let mut memory = Memory::new();
 		f_io.read_to(&mut memory)?;
 		
 		
@@ -67,7 +67,7 @@ impl Db {
 
 
 		let f_io = FileIO::new(f);
-		let mut memory = Memory::new(MemState::ReadWrite);
+		let mut memory = Memory::new();
 		f_io.read_to(&mut memory)?;
 		
 
@@ -83,7 +83,7 @@ impl Db {
 		Ok(Db {
 			file_name: String::new(),
 			f_io: None,
-			memory: Memory::new(MemState::ReadWrite),
+			memory: Memory::new(),
 			r#type: DbType::InMemory,
 		})
 	}

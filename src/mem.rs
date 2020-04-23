@@ -3,14 +3,8 @@ use crate::types::bv::{BvString, BvObject};
 use crate::storage::KvInterface;
 
 
-#[derive(PartialEq)]
-pub enum MemState {
-	WriteOnly,
-	ReadWrite
-}
 
 pub struct Memory<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> {
-	state: MemState,
 	/// KV storage
 	kv_records: KV,
 	/// Group declaration and storage
@@ -19,9 +13,8 @@ pub struct Memory<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> {
 }
 
 impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
-	pub fn new(state: MemState) -> Self {
+	pub fn new() -> Self {
 		Memory {
-			state: state,
 			kv_records: KV::default(),
 			decl_map: DeclarationMap::new(),
 			decl_records: DeclarationRecords::new(),
