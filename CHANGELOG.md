@@ -17,6 +17,7 @@
 * Impl BvObject.PartialEq bool
 * Fix crash when committing an empty db
 * Fix error result when committing with a file name
+* Indexed kv storage, fix iterate bug missing last index
 
 
 ### 0.2.2 2020-04-06
