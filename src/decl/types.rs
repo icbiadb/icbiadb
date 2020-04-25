@@ -117,6 +117,7 @@ pub type DeclarationRecords = HashMap<Vec<u8>, Vec<DeclarationRecord>>;
 /// Stores the declaration of a group or a record
 ///
 /// Used for db.declare("")...
+#[derive(Clone)]
 pub struct Declare {
 	name: Vec<u8>,
 	fields: FieldMap,
