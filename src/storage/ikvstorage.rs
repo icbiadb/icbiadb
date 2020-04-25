@@ -233,19 +233,21 @@ impl<'a> std::iter::Iterator for IndexedKvStorageIter<'a> {
 	fn next(&mut self) -> Option<Self::Item> {
 		let mut item = None;
 
-		if self.index < self.inner[self.key_part].1.len() {
-			item = Some(&self.inner[self.key_part].1[self.index]);
-			self.index += 1;
-		} else {
-			self.key_part += 1;
-			self.index = 0;
-			
-			if self.key_part == self.inner.indexes_len() {
-				return None
-			}
+		if self.inner.indexes_len() > 0 {
+			if self.index < self.inner[self.key_part].1.len() {
+				item = Some(&self.inner[self.key_part].1[self.index]);
+				self.index += 1;
+			} else {
+				self.key_part += 1;
+				self.index = 0;
+				
+				if self.key_part == self.inner.indexes_len() {
+					return None
+				}
 
-			item = Some(&self.inner[self.key_part].1[self.index]);
-			self.index += 1;
+				item = Some(&self.inner[self.key_part].1[self.index]);
+				self.index += 1;
+			}
 		}
 
 		item

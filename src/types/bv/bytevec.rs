@@ -40,7 +40,8 @@ impl ByteVec {
 	}
 
 	pub fn as_str(&self) -> &str {
-		std::str::from_utf8(&self.0.as_slice()[8..]).unwrap()
+		std::str::from_utf8(self.0.as_slice()).unwrap()
+
 	}
 
 	pub fn as_slice(&self) -> &[u8] {

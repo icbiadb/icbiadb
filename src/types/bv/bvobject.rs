@@ -95,7 +95,7 @@ impl BvObject {
 	}
 
 	pub fn as_str(&self) -> &str {
-		self.raw.as_str()
+		std::str::from_utf8(&self.raw.as_slice()[8..]).unwrap()
 	}
 
 	pub fn as_slice(&self) -> &[u8] {
