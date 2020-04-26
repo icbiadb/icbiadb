@@ -4,7 +4,7 @@
 ### 0.2.4
 
 
-* Add Db.regex, optional "regex_keys" feature
+* Add Db.key_regex, key_regexset, value_regex(str only), value_regexset(str only), optional "regex_search" feature
 
 
 ### 0.2.3, 2020-04-26

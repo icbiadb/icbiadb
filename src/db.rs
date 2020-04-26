@@ -397,12 +397,28 @@ impl Db {
 		QueryBuilder::new(field_map, records)
 	}
 
-	#[cfg(feature="regex_keys")]
-	pub fn regex<S: AsRef<str>>(&self, regex: S) -> Vec<(BvStr, &BvObject)> {
+	#[cfg(feature="regex_search")]
+	pub fn key_regex<S: AsRef<str>>(&self, regex: S) -> Vec<(BvStr, &BvObject)> {
 		let re = regex::bytes::Regex::new(regex.as_ref()).unwrap();
-		self.filter(|(k, _)| {
-			re.is_match(k.as_slice())
-		})
+		self.filter(|(k, _)| re.is_match(k.as_slice()))
+	}
+
+	#[cfg(feature="regex_search")]
+	pub fn key_regexset<S: AsRef<str>>(&self, regex: &[S]) -> Vec<(BvStr, &BvObject)> {
+		let set = regex::bytes::RegexSet::new(regex).unwrap();
+		self.filter(|(k, _)| set.is_match(k.as_slice()))
+	}
+
+	#[cfg(feature="regex_search")]
+	pub fn value_regex<S: AsRef<str>>(&self, regex: S) -> Vec<(BvStr, &BvObject)> {
+		let re = regex::bytes::Regex::new(regex.as_ref()).unwrap();
+		self.filter(|(_, v)| v.is_str() && re.is_match(v.as_slice()))
+	}
+
+	#[cfg(feature="regex_search")]
+	pub fn value_regexset<S: AsRef<str>>(&self, regex: &[S]) -> Vec<(BvStr, &BvObject)> {
+		let set = regex::bytes::RegexSet::new(regex).unwrap();
+		self.filter(|(_, v)| v.is_str() &&  set.is_match(v.as_slice()))
 	}
 }
 
