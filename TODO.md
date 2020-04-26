@@ -2,6 +2,7 @@
 ### TODO
 
 
+* Add Search/Filter result where starts_with, contains, ends_with, key_regex, value_regex can be used multiple times
 * Separate BvObject and ByteVec string operations, i.e, stripping string length set by bincode::serialize, since ByteVec is also used for wrapping String.as_bytes and such
 * Operations requiring resize on tuples/vec?
 * Data deduplication?

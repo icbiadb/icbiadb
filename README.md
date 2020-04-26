@@ -23,9 +23,8 @@ I.e, anything but a database library I've ever heard of, especially in this fine
 **Features**
 
 * Atomic operations on tuples, integers and strings without deserialization
-* Indexed vector storage and in the future multi key-part indexed vector and multiple storage options(Binary tree)
-* Key-search, starts_with, ends_with or contains
-* Filter by key, type name or value
+* First-byte indexed vector storage, multi key-part indexed vector and multiple storage options(Binary tree) comming soon
+* Filter by key, type name or value with or without regex(See "regex_search" feature)
 * Declarative data structures
 
 

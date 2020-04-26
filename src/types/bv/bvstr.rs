@@ -1,6 +1,6 @@
 use crate::prelude::{BvContains, BvStartsWith, BvEndsWith};
 use crate::slice::*;
-use super::BvString;
+use super::{BvObject, BvString};
 
 
 
@@ -9,6 +9,11 @@ pub struct BvStr<'a>(&'a [u8]);
 
 impl<'a> BvStr<'a> {
 	pub fn new(s: &'a [u8]) -> Self { BvStr(s) }
+
+	pub fn from_bvobject(o: &'a BvObject) -> Self {
+		BvStr::new(&o.as_slice()[8..])
+	}
+
 	pub fn inner(&self) -> &[u8] { &self.0 }
 
 	pub fn as_str(&self) -> &str {
