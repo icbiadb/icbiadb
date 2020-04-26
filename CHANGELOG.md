@@ -1,6 +1,11 @@
 ## Changelog
 
 
+### 0.2.4
+
+
+* Add Db.regex, optional "regex_keys" feature
+
 
 ### 0.2.3, 2020-04-26
 

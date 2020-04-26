@@ -396,6 +396,14 @@ impl Db {
 		let records = self.memory.get_decl_records(name.as_ref().as_bytes());
 		QueryBuilder::new(field_map, records)
 	}
+
+	#[cfg(feature="regex_keys")]
+	pub fn regex<S: AsRef<str>>(&self, regex: S) -> Vec<(BvStr, &BvObject)> {
+		let re = regex::bytes::Regex::new(regex.as_ref()).unwrap();
+		self.filter(|(k, _)| {
+			re.is_match(k.as_slice())
+		})
+	}
 }
 
 impl BytesFilter for Db {

@@ -10,7 +10,6 @@
 * Redeclare declarations, add/remove columns, rename, change types, return records that don't fit the changes for deletion/updating(Might be useful later, if a script language is ever created for some db stuff or something)
 * Implement some kind of basic ACID transactions
 * File-based sessions
-* Regex and range symbols for key filtering? E.g db.fetch("test:\d{3}"), db.fetch("test:10..20")
 * Async feature
 * Migration functionality
 * Deref record with JIT/cached deserialization?
