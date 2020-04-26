@@ -1,7 +1,8 @@
 ## Changelog
 
 
-### 0.2.3
+
+### 0.2.3, 2020-04-26
 
 
 * Db.decl_insert_many now extends instead of draining and using Db.decl_insert_row
@@ -17,7 +18,10 @@
 * Impl BvObject.PartialEq bool
 * Fix crash when committing an empty db
 * Fix error result when committing with a file name
-* Indexed kv storage, fix iterate bug missing last index
+* Indexed kv storage, fix iterate bug missing last index and index reset
+
+
+---
 
 
 ### 0.2.2 2020-04-06
@@ -37,11 +41,17 @@
 * slice::strip_ref_symbols now removes \*const & \*mut as well
 
 
+---
+
+
 ### 0.2.1 2020-04-2
 
 
 * BvObject cmp::PartialEq<&[u8]>, remove str len from self if is_str else compare whole slice
 * Fixed crash when reading a db-file with only declarations, fio/writer wrote decl::records::IDENT even if there weren't any records, adding written length to decl_records_len in the header making the reader try to parse decl records
+
+
+---
 
 
 ### 0.2.0 2020-04-02

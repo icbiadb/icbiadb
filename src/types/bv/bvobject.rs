@@ -11,7 +11,7 @@ use super::{ByteVec, BvString};
 
 
 
-
+/// Wrapper for serialized objects by bincode
 #[derive(Default, Serialize, Deserialize, Clone, Hash, Debug)]
 pub struct BvObject {
 	type_name: BvString,

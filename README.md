@@ -1,4 +1,4 @@
-[Latest Version]: https://img.shields.io/badge/crates.io-v0.2.2-blue.svg
+[Latest Version]: https://img.shields.io/crates/v/icbiadb
 
 [crates.io]: https://crates.io/crates/icbiadb
 [Build Status]: https://travis-ci.com/icbiadb/icbiadb.svg?branch=master
@@ -15,15 +15,15 @@
 
 IcbiaDB is a simple embedded Key-Value & data structures database with support for storing most types seamlessly. Compared to some other KV databases, IcbiaDB supports partial key searches and soon, atomic operations without serialization, allowing for rather fast ...stuff, on big data sets.
 
-The basic goal though, is merely a quick and dirty relatively reliable database with minimal preperation, minimal dependencies and decent performence on low-end computers and also the ability to seamlessly store, manipulate and present primitives and dynamic structures without too much hassle. Oh, and it comes with a free beer.
+The basic goal though, is merely a quick and dirty reliable database with minimal preperation, minimal dependencies and decent performence on low-end computers and also the ability to seamlessly store, manipulate and present primitives and complex structures without too much hassle. Oh, and it comes with a free beer.
 
 I.e, anything but a database library I've ever heard of, especially in this fine language.
 
 
 **Features**
 
-* Atomic operations on tuples(soon vec), integers and strings without deserialization
-* Indexed vector storage and in the future multi key-part indexed vector and multiple storage options(Binary tree, HashMap etc)
+* Atomic operations on tuples, integers and strings without deserialization
+* Indexed vector storage and in the future multi key-part indexed vector and multiple storage options(Binary tree)
 * Key-search, starts_with, ends_with or contains
 * Filter by key, type name or value
 * Declarative data structures
@@ -172,7 +172,6 @@ Data set: 500000 title: short str, text: first paragraph of "lorem ipsum"
 
 Coming soon
 
-* incr/incrby, decr/decrby functions for incrementing ints or tuple element of ints
 * substr/srange(start, length)
 * More REDIS-inspired stuff
 

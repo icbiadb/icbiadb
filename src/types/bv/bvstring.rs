@@ -207,5 +207,3 @@ impl std::cmp::PartialEq<String> for &BvString {
 		self.as_slice() == other.as_bytes()
 	}
 }
-
-

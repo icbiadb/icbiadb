@@ -2,6 +2,7 @@
 ### TODO
 
 
+* Separate BvObject and ByteVec string operations, i.e, stripping string length set by bincode::serialize, since ByteVec is also used for wrapping String.as_bytes and such
 * Operations requiring resize on tuples/vec?
 * Data deduplication?
 * Cached single-time deserialization for records

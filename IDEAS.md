@@ -1,12 +1,62 @@
 This is merely ideas that might be implemented if there are any use.
 
 
+**Modularized KV/SQL/Document interface**
+
+
+```rust
+let mut db = icbiadb::Database::create("test.idb");
+
+
+
+// KV database
+let kv = db.kv_storage::<IKVStorage>();
+//let kv = db.kv_storage::<BinTree>();
+kv.set("test1", 0);
+kv.filter(|(k, v)| {
+	v == 0
+});
+
+
+// SQL database
+let sql = db.sql_storage();
+
+if_not_exists_create!{sql, "test",
+	(test: String, test1: i32)
+};
+
+query!{sql, "test",
+	select test, test1;
+	filter {
+		test1 == 0
+	}
+}
+
+
+// JSON/BSON documents
+let docs = db.document_storage();
+
+// Customize serde_json for byte storage
+let test = json!({"test": "test", "test1": 0});
+docs.collection("test").insert(test);
+docs.collection("test").insert_many(tests);
+
+docs.collection("test").filter("test1" == 0);
+
+
+
+db.commit();
+```
+
+---
+
+
 **QOL moccup**
 
 Rules for key-part identifiers.
 
 key-base(identifier), separator, option(auto-increment, etc)
-```
+```rust
 db.key_config("my_integers", ":", KvRule::AutoIncrement)
 db.store("my_integers", 20) -> "my_integers:0" = 20
 db.store("my_integers", 34) -> "my_integers:1" = 34

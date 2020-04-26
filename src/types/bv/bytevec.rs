@@ -13,7 +13,7 @@ use std::convert::TryFrom;
 
 
 
-
+/// Byte vec wrapper
 #[derive(Default, Serialize, Deserialize, Clone, Hash, Debug, Eq)]
 pub struct ByteVec(Vec<u8>);
 
@@ -41,7 +41,6 @@ impl ByteVec {
 
 	pub fn as_str(&self) -> &str {
 		std::str::from_utf8(self.0.as_slice()).unwrap()
-
 	}
 
 	pub fn as_slice(&self) -> &[u8] {
