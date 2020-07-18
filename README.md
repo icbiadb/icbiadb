@@ -22,6 +22,7 @@ The basic goal though, is merely a fast reliable database with minimal preperati
 
 
 **KV**:
+* Multiple data storages
 * Atomic operations on tuples, integers and strings
 * Filter by key, type name or value with or without regex(See "regex_search" feature)
 
@@ -30,6 +31,7 @@ The basic goal though, is merely a fast reliable database with minimal preperati
 
 
 **JSON**:
+Not implemented yet
 
 
 **Example**

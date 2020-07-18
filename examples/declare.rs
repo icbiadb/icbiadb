@@ -4,8 +4,7 @@ use icbiadb::prelude::*;
 use icbiadb::{if_not_exists_create, query, query_deserialize};
 
 fn main() -> io::Result<()> {
-    let mut db = icbiadb::mem()?;
-    let db = db.mut_table_database();
+    let mut db = icbiadb::table::mem();
 
     if_not_exists_create! {db, "articles",
         (title: String, date: String[unique])
