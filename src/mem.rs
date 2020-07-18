@@ -69,6 +69,7 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
 		self.kv_records.remove(key)
 	}
 
+	/*
 	pub fn decls(&self) -> &DeclarationMap {
 		&self.decl_map
 	}
@@ -106,6 +107,7 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> Memory<KV> {
 	pub fn get_decl_records_mut(&mut self, name: &[u8]) -> &mut Vec<DeclarationRecord> {
 		self.decl_records.get_mut(name).expect(&format!("No entry found for key {:?}", name.as_ref()))
 	}
+	*/
 }
 
 
@@ -122,4 +124,3 @@ impl<KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>> std::ops::IndexM
 		self.kv_records.get_mut(index)
 	}
 }
-

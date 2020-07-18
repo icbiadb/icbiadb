@@ -4,23 +4,48 @@
 ### 0.2.4
 
 
-* Add Db.key_regex, key_regexset, value_regex(str only), value_regexset(str only), optional "regex_search" feature
+**Breaking changes**
+
+**Modularized KV/tables**
+* *icbiadb::Db* has been replaced with *KvDb*, *TableDb*, *DocDb*
+
+
+
+
+**Changes**
+
+
+**Key-Value database**
+
+* Impl BTreeMap storage
+* Add *KvDb.get_str* -> *BvStr*
+* Add *KvDb.key_regex*, *key_regexset*, *value_regex*(str only), *value_regexset*(str only), optional "regex_search" feature
+
+
+**Table database**
+
+
+**Doc database**
+
+
+
+---
 
 
 ### 0.2.3, 2020-04-26
 
 
-* Db.decl_insert_many now extends instead of draining and using Db.decl_insert_row
-* Add Db.incr, decr, incr_by, decr_by
-* Add BvTuple.get(index) -> BvObj
-* Add BvObj, BvStr, BvInt
-* Add ByteVec i8, u8 conversion
-* Move Db.update to Db.set
-* Rename store, fetch -> set, get
-* Remove Db::write_only
-* Db.remove now returns the removed element
-* Db.set now checks byte vec length for fast value replace, else remove and insert new value
-* Impl BvObject.PartialEq bool
+* *Db.decl_insert_many* now extends instead of draining and using Db.decl_insert_row
+* Add *Db.incr*, *decr*, *incr_by*, *decr_by*
+* Add *BvTuple.get*(index) -> *BvObj*
+* Add *BvObj*, *BvStr*, *BvInt*
+* Add *ByteVec* i8, u8 conversion
+* Move *Db.update* to *Db.set*
+* Rename *store*, *fetch* -> *set*, *get*
+* Remove *Db::write_only*
+* *Db.remove* now returns the removed element
+* *Db.set* now checks byte vec length for fast value replace, else remove and insert new value
+* Impl *BvObject.PartialEq*
 * Fix crash when committing an empty db
 * Fix error result when committing with a file name
 * Indexed kv storage, fix iterate bug missing last index and index reset
