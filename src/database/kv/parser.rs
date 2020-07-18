@@ -51,9 +51,7 @@ pub fn extract_single(v: &[u8], k_len: usize, t_len: usize, v_len: usize) -> (Ve
     )
 }
 
-pub fn extract_records<KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]>>(
-    v: &[u8],
-) -> KV {
+pub fn extract_records<KV: KvInterface<Key = BvString, Value = BvObject>>(v: &[u8]) -> KV {
     assert_eq!(v[..3], kv::IDENT);
     let idxs = seqs_find_all(&v, &kv::IDENT);
 

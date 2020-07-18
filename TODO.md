@@ -1,5 +1,5 @@
 
-### TODO
+## TODO
 
 
 * Add Search/Filter result where starts_with, contains, ends_with, key_regex, value_regex can be used multiple times
@@ -8,18 +8,11 @@
 * Data deduplication?
 * Cached single-time deserialization for records
 * Nicer error-handling/more helpful panics
-* Redeclare declarations, add/remove columns, rename, change types, return records that don't fit the changes for deletion/updating(Might be useful later, if a script language is ever created for some db stuff or something)
 * Implement some kind of basic ACID transactions
 * File-based sessions
 * Async feature
 * Migration functionality
 * Deref record with JIT/cached deserialization?
-
-
-**IndexedKvStructure**
-
-* Key separator seperated multi-indexing for IndexedKvStructure(up to 6 keys or something) 
-* Impl insert_many
 
 
 **Macros**
@@ -28,12 +21,21 @@
 * [query_deserialize] change params to only take type instead of $field:ident:$t:ty(ident used for tuple deconstruct atm, alternatives?)
 
 
+### Storages
+
+**IndexedKvStructure**
+
+* Key seperated multi-indexed Vec(e.g "article:title:hashid")
+* Impl insert_many
+
+### Databases
+
 **KV**
 
 * Search & filter only of type T(Create type name lookup maps), like redis HSCAN, SSCAN etc
 
 
-**Declarations**
+**Table**
 
 * Impl update
 * Column options(Primary Key, Foreign key?, Unique)

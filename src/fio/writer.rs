@@ -29,9 +29,9 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
 
     pub fn write_header(&mut self) -> std::io::Result<usize> {
         let mut length = 0;
-        self.writer.seek(SeekFrom::Start(0))?;
+        self.writer.seek(SeekFrom::Start(8))?;
         length += self.writer.write(&serialize(&self.table_length))?;
-        length += self.writer.write(&serialize(&self.kv_records_length))?;
+        //length += self.writer.write(&serialize(&self.kv_records_length))?;
         length += self.writer.write(&serialize(&self.table_rows_length))?;
 
         Ok(length)
@@ -89,7 +89,7 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
         Ok(())
     }
 
-    pub fn write_kv_record(&mut self, record: &(BvString, BvObject)) -> std::io::Result<u64> {
+    pub fn write_kv_record(&mut self, record: (&BvString, &BvObject)) -> std::io::Result<u64> {
         // Identifier, name length, fields length, name, fields
         let (k, v) = record;
         assert!(k.len() as u8 > 0 && v.type_name().len() as u8 > 0);
@@ -106,6 +106,7 @@ impl<T: std::io::Write + std::io::Seek> Writer<T> {
         length += self.writer.write(k.as_slice())? as u64;
         length += self.writer.write(v.type_name().as_slice())? as u64;
         length += self.writer.write(v.as_slice())? as u64;
+
         Ok(length)
     }
 

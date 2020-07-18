@@ -197,7 +197,7 @@ pub struct QueryBuilder<'a> {
     field_map: &'a FieldMap,
     records: &'a [TableRow],
     select_fields: Vec<&'a str>,
-    filter: Option<Box<Fn(&HashMap<&str, &BvObject>) -> bool>>,
+    filter: Option<Box<dyn Fn(&HashMap<&str, &BvObject>) -> bool>>,
 }
 
 impl<'a> QueryBuilder<'a> {

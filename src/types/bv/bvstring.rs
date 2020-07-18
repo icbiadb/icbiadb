@@ -160,61 +160,73 @@ impl std::ops::Index<std::ops::RangeTo<usize>> for BvString {
     }
 }
 
-impl std::cmp::PartialEq<BvString> for BvString {
+impl PartialOrd for BvString {
+    fn partial_cmp(&self, other: &BvString) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for BvString {
+    fn cmp(&self, other: &BvString) -> std::cmp::Ordering {
+        self.0.cmp(&other.0)
+    }
+}
+
+impl PartialEq<BvString> for BvString {
     fn eq(&self, other: &BvString) -> bool {
         &self.0 == other.inner()
     }
 }
 
-impl std::cmp::PartialEq<&BvString> for BvString {
+impl PartialEq<&BvString> for BvString {
     fn eq(&self, other: &&BvString) -> bool {
         &self.0 == other.inner()
     }
 }
 
-impl std::cmp::PartialEq<BvStr<'_>> for BvString {
+impl PartialEq<BvStr<'_>> for BvString {
     fn eq(&self, other: &BvStr<'_>) -> bool {
         self.0.as_slice() == other.inner()
     }
 }
 
-impl std::cmp::PartialEq<String> for BvString {
+impl PartialEq<String> for BvString {
     fn eq(&self, other: &String) -> bool {
         self.as_slice() == other.as_bytes()
     }
 }
 
-impl std::cmp::PartialEq<&String> for BvString {
+impl PartialEq<&String> for BvString {
     fn eq(&self, other: &&String) -> bool {
         self.as_slice() == other.as_bytes()
     }
 }
 
-impl std::cmp::PartialEq<str> for BvString {
+impl PartialEq<str> for BvString {
     fn eq(&self, other: &str) -> bool {
         self.as_slice() == other.as_bytes()
     }
 }
 
-impl std::cmp::PartialEq<&str> for BvString {
+impl PartialEq<&str> for BvString {
     fn eq(&self, other: &&str) -> bool {
         self.as_slice() == other.as_bytes()
     }
 }
 
-impl std::cmp::PartialEq<[u8]> for BvString {
+impl PartialEq<[u8]> for BvString {
     fn eq(&self, other: &[u8]) -> bool {
         self.as_slice() == other
     }
 }
 
-impl std::cmp::PartialEq<&[u8]> for BvString {
+impl PartialEq<&[u8]> for BvString {
     fn eq(&self, other: &&[u8]) -> bool {
         &self.as_slice() == other
     }
 }
 
-impl std::cmp::PartialEq<String> for &BvString {
+impl PartialEq<String> for &BvString {
     fn eq(&self, other: &String) -> bool {
         self.as_slice() == other.as_bytes()
     }

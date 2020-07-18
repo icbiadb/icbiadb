@@ -1,15 +1,93 @@
+//! A table database with generic interface and multiple storage options.
+//!
+//! # Example
+//!
+//! ```
+//! // You can have rust code between fences inside the comments
+//! // If you pass --test to `rustdoc`, it will even test it for you!
+//! use doc::Person;
+//! let person = Person::new("name");
+//! ```
+
 pub mod parser;
 pub mod types;
 
+use std::io::{BufReader, Seek, SeekFrom};
+
+use crate::fio;
 use types::*;
+
+pub fn mem() -> TableDb {
+    TableDb {
+        file_name: String::new(),
+        maps: TableMap::default(),
+        rows: TableRows::default(),
+    }
+}
+
+pub fn create(file_name: &str) -> std::io::Result<TableDb> {
+    let f = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(file_name)?;
+
+    let mut reader = fio::reader::Reader::new(BufReader::new(f));
+
+    if reader.is_empty() {
+        return Ok(TableDb {
+            file_name: file_name.to_string(),
+            maps: TableMap::default(),
+            rows: TableRows::default(),
+        });
+    }
+
+    reader.seek(SeekFrom::Start(8))?;
+    let header = reader.read_header()?;
+    let (lu_map, tmaps) = reader.read_table_definitions(header.table_length)?;
+
+    let mut trows = TableRows::new();
+
+    for (name, _) in tmaps.iter() {
+        // rstart, rlen, rcount
+        let (rstart, rlen, _) = lu_map[name];
+
+        reader.seek(SeekFrom::Start(rstart))?;
+        let records = reader
+            .read_table_rows(rlen)
+            .expect("[Reading decl records] Failed to read decl records");
+
+        trows.insert(name.to_vec(), records);
+    }
+
+    Ok(TableDb {
+        file_name: file_name.to_string(),
+        maps: tmaps,
+        rows: trows,
+    })
+}
 
 #[derive(Default)]
 pub struct TableDb {
+    pub file_name: String,
     pub maps: TableMap,
     pub rows: TableRows,
 }
 
 impl TableDb {
+    pub fn commit(&self) -> std::io::Result<()> {
+        let f = std::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(&self.file_name)?;
+
+        let mut fio = fio::FileIO::new(f);
+        fio.commit_table_db(self)?;
+
+        Ok(())
+    }
+
     pub fn exists<S: AsRef<str>>(&self, name: S) -> bool {
         self.maps.contains_key(name.as_ref().as_bytes())
     }

@@ -13,85 +13,82 @@
 [Changelog](https://github.com/icbiadb/icbiadb/blob/master/CHANGELOG.md)
 
 
-IcbiaDB is a simple embedded 3-in-1(key-value, table and JSON/BSON) database with multiple data backends aiming for JIT deserialization.
+IcbiaDB is a simple embedded 3-in-1(KV, table and JSON/BSON) database interface with JIT serialization.
 
-The basic goal though, is merely a quick and dirty reliable database with minimal preperation, minimal dependencies and decent performence on low-end computers with the ability to seamlessly store, manipulate and present primitives and complex data structures without too much hassle. Oh, and it comes with a free beer.
-
-I.e, anything but a database library I've ever heard of, especially in this fine language.
+The basic goal though, is merely a fast reliable database with minimal preperation, minimal dependencies and decent performence on low-end computers with the ability to seamlessly store, manipulate and present primitives and complex data structures without too much hassle. Oh, and it comes with a free beer.
 
 
 **Features**
 
-* Atomic operations on tuples, integers and strings without deserialization
-* First-byte indexed vector storage, multi key-part indexed vector and multiple storage options(Binary tree) comming soon
+
+**KV**:
+* Atomic operations on tuples, integers and strings
 * Filter by key, type name or value with or without regex(See "regex_search" feature)
+
+
+**Tables**:
+
+
+**JSON**:
 
 
 **Example**
 
 
 ```rust
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+
 use icbiadb::prelude::*;
-
-
+use icbiadb::types::BvObject;
+use icbiadb::{if_not_exists_create, query};
+use icbiadb::storage::BTreeMap;
 
 #[derive(Serialize, Deserialize)]
 struct Article {
-	title: String,
-	text: String,
+    title: String,
+    text: String,
 }
 
-
-
 fn main() -> std::io::Result<()> {
-	let mut db = icbiadb::mem()?;
-	
-	// set, get
-	db.set("key:welcome", "Hello World!");
-	let v = db.get("key:welcome"); // -> BvObject
+    let mut db = icbiadb::kv::mem::<BTreeMap>();
 
-	// No reason to deserialize values with Db.get_value if they are primitives and meant for 
-	// simple operations like comparison, BvObject will type check and do byte vec stuff or deserialize internally.
-	// Addition, subtraction etc coming soon
-	if v == "Hello World!" || v == 100 {
-		println!("{:?} of type {}", v.extract::<String>(), v.type_name());
-	}
+    // set, get
+    db.set("key:welcome", "Hello World!");
+    let v = db.get("key:welcome").unwrap(); // -> BvObject
 
-	db.set("key:welcome", 100);
-	let key_welcome = db.get_value::<i32>("key:welcome");
+    if v == "Hello World!" || v == 100 {
+        println!("{:?} of type {}", v.extract::<String>(), v.type_name());
+    }
 
-	if db.get("visited") == true {
-		db.incr("visitors");
-	}
+    db.set("key:welcome", 100);
+    let key_welcome = db.get_value::<i32>("key:welcome");
 
-	let article = Article { title: "A title".to_string(), text: "Hello World!".to_string() };
-	db.set("articles:0", &article);
+    if db.get("visited").is_some() {
+        db.incr("visitors");
+    }
 
-	// Atomic operations on tuple elements
-	// Requires same type and length though... yet
-	db.set("my_tuple", (100, 100, "hello world!"));
-	let bvtuple = db.get_tuple("my_tuple");
-	bvtuple.set(1, 111); // -> (100, 111, "hello world!")
-	bvtuple.set(2, "hello!!!!!!!");
-	bvtuple.value::<i32>(1); // -> 111
+    let article = Article {
+        title: "A title".to_string(),
+        text: "Hello World!".to_string(),
+    };
+    db.set("articles:0", &article);
 
-	db.commit();
+    // Atomic operations on tuple elements, requires same type and length.
+    db.set("my_tuple", (100, 100, "hello world!"));
+    let mut bvtuple = db.get_tuple("my_tuple").unwrap();
+    bvtuple.set(1, 111); // -> (100, 111, "hello world!")
+    bvtuple.set(2, "hello!!!!!!!");
+    bvtuple.value::<i32>(1); // -> 111
 
-	// Seamless string bytes comparison, integers are atm converted natively(from_le_bytes)
-	db.filter(|(k, v)| {
-		v.type_name() == "IcbiaDB_tests::Article"
-		|| v.contains("this is a string")
-	});
+    // Seamless string bytes comparison, integers are atm converted natively(from_le_bytes)
+    db.filter(|(k, v)| v.type_name() == "IcbiaDB_tests::Article" || v.contains("this is a string"));
 
-	db.starts_with("calculations:").iter()
-		.filter(|(k, v)| {
-			k.contains(":super_calc:")
-			&& *v > 100.0 && *v < 200.0
-		})
-		.collect::<Vec<_>>();
+    db.starts_with("calculations:")
+        .iter()
+        .filter(|(k, v)| k.contains(":super_calc:") && *v > 100.0 && *v < 200.0)
+        .collect::<Vec<_>>();
 
-	Ok(())
+    Ok(())
 }
 ```
 
@@ -111,28 +108,6 @@ IcbiaDB stores everything as simple byte arrays and don't mess with it once its 
 
 
 ---
-
-
-**Performence**
-
-
-No real bench marks yet, but as an example, searching and filtering 4 million KV records and half a million decl records on an Asus E402S, Intel Dual-Core N3060, 2gb ram, single thread
-
-Data set: ~3 million i64s, ~1million Article { short str, short str }
-```
-[2020-03-26T16:05:48Z DEBUG icbiadb::fio::reader] Loaded 0 Declarations, 4000000 KV records, 0 Declared records in 2.797347558s
-[2020-03-26T16:05:51Z INFO  IcbiaDB_tests] starts_with "test:", found 999999 db: 140.30478ms
-[2020-03-26T16:05:51Z INFO  IcbiaDB_tests] contains "st:1", found 111110 db: 244.240446ms
-[2020-03-26T16:05:52Z INFO  IcbiaDB_tests] Filter: (r > 7000 && r < 9000) || (r > 20000 && r < 45000): 80994 items in 229.157685ms
-[2020-03-26T16:05:52Z INFO  IcbiaDB_tests] Filter: r.raw_type_name() == "IcbiaDB_tests::Article".as_bytes(): 1000000 items in 181.358364ms
-```
-
-Data set: 500000 title: short str, text: first paragraph of "lorem ipsum"
-```
-[2020-03-28T19:02:23Z DEBUG icbiadb::fio::reader] Loaded 1 Declarations, 0 KV records, 500000 Declared records in 4.08070582s
-[2020-03-28T19:02:24Z INFO  IcbiaDB_tests] Filtered { title == "A shorter title" }: 250000 records in 193.428521ms
-[2020-03-28T19:02:24Z INFO  IcbiaDB_tests] Deserialized 114 MB in 330.525201ms
-```
 
 
 **NOTE**

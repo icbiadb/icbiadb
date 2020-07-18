@@ -1,9 +1,9 @@
 use crate::types::bv::{BvObject, BvString};
 
 pub trait BytesFilter {
-    fn filter<F>(&self, cb: F) -> Vec<&(BvString, BvObject)>
+    fn filter<F>(&self, cb: F) -> Vec<(&BvString, &BvObject)>
     where
-        F: Fn(&(BvString, BvObject)) -> bool;
+        F: Fn((&BvString, &BvObject)) -> bool;
 }
 
 pub trait BytesSearch {

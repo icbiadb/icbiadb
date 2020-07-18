@@ -96,7 +96,7 @@ where
 
     fn index(&self, index: &Q) -> &Self::Output {
         self.get(index)
-            .unwrap_or_else(|| panic!("Failed to find index {:?}", index))
+            .unwrap_or_else(|| panic!("Failed to find key starting with {:?}", index))
     }
 }
 
@@ -131,12 +131,13 @@ impl<I: Eq, V> std::convert::From<Vec<(I, V)>> for IndexVec<I, V> {
     }
 }
 
+/// Recommended for small databases
 #[derive(Default, Clone)]
-pub struct IndexedKvStorage {
+pub struct IndexedVec {
     inner: IndexVec<u8, IndexVec<BvString, BvObject>>,
 }
 
-impl KvInterface for IndexedKvStorage {
+impl KvInterface for IndexedVec {
     type Key = BvString;
     type Value = BvObject;
     type RefKey = [u8];
@@ -146,11 +147,11 @@ impl KvInterface for IndexedKvStorage {
     }
 
     fn has_key(&self, key: &[u8]) -> bool {
-        if self.inner.has_index(&key[0]) && self.inner[&key[0]].has_index(key) {
-            return true;
+        if !self.inner.has_index(&key[0]) || !self.inner[&key[0]].has_index(key) {
+            return false;
         }
 
-        false
+        true
     }
 
     fn is_empty(&self) -> bool {
@@ -184,12 +185,16 @@ impl KvInterface for IndexedKvStorage {
         */
     }
 
-    fn get(&self, key: &[u8]) -> &BvObject {
-        &self.inner[&key[0]][key]
+    fn get(&self, key: &[u8]) -> Option<&BvObject> {
+        if let Some(v) = self.inner.get(&key[0]) {
+            return v.get(key);
+        }
+
+        None
     }
 
-    fn get_mut(&mut self, key: &[u8]) -> &mut BvObject {
-        &mut self.inner[&key[0]][key]
+    fn get_mut(&mut self, key: &[u8]) -> Option<&mut BvObject> {
+        self.inner[&key[0]].get_mut(key)
     }
 
     fn remove(&mut self, key: &[u8]) -> BvObject {
@@ -197,7 +202,7 @@ impl KvInterface for IndexedKvStorage {
     }
 }
 
-impl IntoIterator for IndexedKvStorage {
+impl IntoIterator for IndexedVec {
     type Item = (BvString, BvObject);
     type IntoIter = IndexedMKvStorageIter;
 
@@ -211,7 +216,7 @@ impl IntoIterator for IndexedKvStorage {
 }
 
 pub struct IndexedMKvStorageIter {
-    inner: IndexedKvStorage,
+    inner: IndexedVec,
     key_part: usize,
     index: usize,
 }
@@ -243,12 +248,12 @@ impl std::iter::Iterator for IndexedMKvStorageIter {
     }
 }
 
-impl<'a> IntoIterator for &'a IndexedKvStorage {
-    type Item = &'a (BvString, BvObject);
-    type IntoIter = IndexedKvStorageIter<'a>;
+impl<'a> IntoIterator for &'a IndexedVec {
+    type Item = (&'a BvString, &'a BvObject);
+    type IntoIter = IndexedVecIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        IndexedKvStorageIter {
+        IndexedVecIter {
             inner: self,
             key_part: 0,
             index: 0,
@@ -256,7 +261,7 @@ impl<'a> IntoIterator for &'a IndexedKvStorage {
     }
 }
 
-impl std::ops::Index<usize> for IndexedKvStorage {
+impl std::ops::Index<usize> for IndexedVec {
     type Output = (u8, IndexVec<BvString, BvObject>);
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -264,27 +269,28 @@ impl std::ops::Index<usize> for IndexedKvStorage {
     }
 }
 
-impl std::ops::IndexMut<usize> for IndexedKvStorage {
+impl std::ops::IndexMut<usize> for IndexedVec {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.inner[index]
     }
 }
 
-pub struct IndexedKvStorageIter<'a> {
-    inner: &'a IndexedKvStorage,
+pub struct IndexedVecIter<'a> {
+    inner: &'a IndexedVec,
     key_part: usize,
     index: usize,
 }
 
-impl<'a> std::iter::Iterator for IndexedKvStorageIter<'a> {
-    type Item = &'a (BvString, BvObject);
+impl<'a> std::iter::Iterator for IndexedVecIter<'a> {
+    type Item = (&'a BvString, &'a BvObject);
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut item = None;
 
         if self.inner.indexes_len() > 0 {
             if self.index < self.inner[self.key_part].1.len() {
-                item = Some(&self.inner[self.key_part].1[self.index]);
+                let (k, v) = &self.inner[self.key_part].1[self.index];
+                item = Some((k, v));
                 self.index += 1;
             } else {
                 self.key_part += 1;
@@ -294,7 +300,8 @@ impl<'a> std::iter::Iterator for IndexedKvStorageIter<'a> {
                     return None;
                 }
 
-                item = Some(&self.inner[self.key_part].1[self.index]);
+                let (k, v) = &self.inner[self.key_part].1[self.index];
+                item = Some((k, v));
                 self.index += 1;
             }
         }

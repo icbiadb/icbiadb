@@ -12,6 +12,8 @@ pub struct BvTuple<'a> {
 
 impl<'a> BvTuple<'a> {
     pub fn from(obj: &'a mut BvObject) -> Self {
+        // TODO
+        // Optimize away, calculate element len and JIT type name check instead of vec alloc
         let type_map = slice::split(&obj.type_name()[1..obj.type_name().len() - 1], b", ")
             .iter()
             .map(|r| BvString::from(normalize_type_name(r).to_vec()))
@@ -66,9 +68,7 @@ impl<'a> BvTuple<'a> {
     pub fn get(&'a self, index: usize) -> BvObj<'a> {
         let r = &self.inner[self.get_start(index)..self.get_start(index) + self.elength[index]];
 
-        if self.type_map[index] == "str" {
-            BvObj::new(self.type_map[index].as_slice(), r)
-        } else if is_int(self.type_map[index].as_slice()) {
+        if self.type_map[index] == "str" || is_int(self.type_map[index].as_slice()) {
             BvObj::new(self.type_map[index].as_slice(), r)
         } else {
             panic!("Failed to implicit cast byte slice to type")
@@ -95,13 +95,11 @@ impl<'a> BvTuple<'a> {
             )
         }
 
-        let mut x = 0;
         let start = self.get_start(index);
         let new_slice = new_value.as_slice();
 
-        for i in start..start + length {
+        for (x, i) in (start..start + length).enumerate() {
             self.inner[i] = new_slice[x];
-            x += 1;
         }
     }
 }

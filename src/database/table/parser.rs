@@ -144,7 +144,6 @@ pub mod rows {
         let mut cursor = Cursor::new(&v);
         let mut vec = Vec::with_capacity(idxs.len());
 
-        // Retrieve kV
         for idx in idxs {
             cursor.jump(idx);
             let r_len = get_record_len(cursor.peek(table::rows::RECORD_IDENT_HEAD_BS));
