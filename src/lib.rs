@@ -3,7 +3,9 @@
 //! # Key-Value example
 //!
 //! ```
-//! let db = icbiadb::kv::create::<BTreeMap>("my_kvs.idb");
+//! use icbiadb::storage::BTreeMap;
+//!
+//! let mut db = icbiadb::kv::create::<BTreeMap>("my_kvs.idb").unwrap();
 //! db.set("hello:world", 100);
 //! db.commit();
 //! ```
@@ -12,7 +14,9 @@
 //! # Table example
 //!
 //! ```
-//! let db = icbiadb::table::create("my_tables.idb");
+//! use icbiadb::if_not_exists_create;
+//!
+//! let mut db = icbiadb::table::create("my_tables.idb").unwrap();
 //!
 //! if_not_exists_create! {db, "articles",
 //!     (title: String, date: String[unique])

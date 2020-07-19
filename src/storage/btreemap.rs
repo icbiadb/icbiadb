@@ -63,14 +63,12 @@ impl<'a> IntoIterator for &'a BTreeMap {
     fn into_iter(self) -> Self::IntoIter {
         BTreeMapIntoIter {
             inner: self.0.iter(),
-            index: 0,
         }
     }
 }
 
 pub struct BTreeMapIntoIter<'a> {
     inner: std::collections::btree_map::Iter<'a, BvString, BvObject>,
-    index: usize,
 }
 
 impl<'a> std::iter::Iterator for BTreeMapIntoIter<'a> {
