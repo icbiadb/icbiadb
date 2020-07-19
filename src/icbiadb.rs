@@ -36,18 +36,6 @@ impl IcbiaDB {
         let fio = FileIO::new(f);
         fio.read_file(&mut icbiadb)?;
 
-        /*
-        let mut kvs = KvDb::new();
-        let mut tables = TableDb::new();
-        let mut docs = DocDb::new();
-
-
-        f_io.read_kvs(&mut kvs)?;
-        f_io.read_tables(&mut tables)?;
-        f_io.read_docs(&mut docs)?;
-
-        */
-
         Ok(icbiadb)
     }
 
@@ -67,16 +55,6 @@ impl IcbiaDB {
 
         let fio = FileIO::new(f);
         fio.read_file(&mut icbiadb)?;
-        /*
-        let mut kvs = KvDb::new();
-        let mut tables = TableDb::new();
-        let mut docs = DocDb::new();
-
-
-        f_io.read_kvs(&mut kvs)?;
-        f_io.read_tables(&mut tables)?;
-        f_io.read_docs(&mut docs)?;
-        */
 
         Ok(icbiadb)
     }
@@ -96,17 +74,6 @@ impl IcbiaDB {
 
         let fio = FileIO::new(f);
         fio.read_file(&mut icbiadb)?;
-
-        /*
-        let mut kvs = KvDb::new();
-        let mut tables = TableDb::new();
-        let mut docs = DocDb::new();
-
-
-        f_io.read_kvs(&mut kvs)?;
-        f_io.read_tables(&mut tables)?;
-        f_io.read_docs(&mut docs)?;
-        */
 
         Ok(icbiadb)
     }
@@ -206,29 +173,4 @@ impl IcbiaDB {
         let mut fio = FileIO::new(f);
         fio.write_file(&self)
     }
-
-    /*
-    pub fn file_name(&self) -> &str {
-        self.file_name.as_str()
-    }
-
-    pub fn commit(&mut self) -> std::io::Result<()> {
-        if self.file_name.is_empty() {
-            return Err(std::io::Error::new(std::io::ErrorKind::Other, "File name not set, are you using a memory database?"))
-        }
-
-        let f = std::fs::OpenOptions::new()
-            .write(true)
-            .read(true)
-            .create(true)
-            .truncate(true)
-            .open(&self.file_name)?;
-
-        self.f_io = Some(FileIO::new(f));
-        self.r#type = DbType::File;
-        self.f_io.as_mut().unwrap().dump_mem::<IndexedKvStorage>(&self.memory).unwrap();
-
-        Ok(())
-    }
-    */
 }

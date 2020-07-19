@@ -27,9 +27,7 @@ pub mod globals {
             /// Declaration records identifier
             pub const IDENT: [u8; 3] = [0x2, 0x1E, 120]; // \x02x
             pub const RECORD_IDENT: [u8; 3] = [3, 0x1E, 120]; // \x02x
-
             pub const RECORD_IDENT_HEAD_BS: usize = RECORD_IDENT.len() + RECORD_LEN_BS;
-
             pub const RECORD_LEN_BS: usize = U32_BS; // Byte size of a single records total length
         }
     }

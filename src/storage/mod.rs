@@ -1,8 +1,11 @@
-pub mod btreestorage;
-pub mod ikvstorage;
+//! Underlying storage of the Key-Value database implementation
+//!
 
-pub use btreestorage::BTreeMap;
-pub use ikvstorage::IndexedVec;
+pub mod btreemap;
+pub mod ikv;
+
+pub use btreemap::BTreeMap;
+pub use ikv::IndexedVec;
 
 pub trait KvInterface: std::default::Default + IntoIterator {
     type Key;

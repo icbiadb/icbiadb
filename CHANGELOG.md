@@ -1,31 +1,22 @@
 ## Changelog
 
 
-### 0.2.4
-
+### 0.3.0, 2020-07-19
 
 **Breaking changes**
-
-**Modularized KV/tables**
 * *icbiadb::Db* has been replaced with *KvDb*, *TableDb*, *DocDb*
-
-
-
 
 **Changes**
 
-
-**Key-Value database**
+**Key-Value db**
 
 * Impl BTreeMap storage
 * Add *KvDb.get_str* -> *BvStr*
 * Add *KvDb.key_regex*, *key_regexset*, *value_regex*(str only), *value_regexset*(str only), optional "regex_search" feature
 
 
-**Table database**
-
-
-**Doc database**
+**Table db**
+* Change TableRow.insert to TableRow.set_col
 
 
 

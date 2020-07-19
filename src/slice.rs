@@ -27,7 +27,6 @@ pub fn strip_ref_symbols(v: &[u8]) -> &[u8] {
 }
 
 // Manipulate functions
-
 pub fn find(v: &[u8], seq: &[u8]) -> Option<usize> {
     if seq.len() > v.len() {
         return None;

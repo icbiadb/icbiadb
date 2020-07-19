@@ -76,7 +76,7 @@ impl TableRow {
         TableRow(HashMap::with_capacity(cap))
     }
 
-    pub fn insert<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, field: S, value: T) {
+    pub fn set_col<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, field: S, value: T) {
         self.0
             .insert(field.as_ref().as_bytes().to_vec(), serialize_object(&value));
     }

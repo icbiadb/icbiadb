@@ -42,10 +42,6 @@ pub fn deserialize_bytevec<'a, T: ?Sized + serde::de::Deserialize<'a>>(t: &'a By
     bincode::deserialize(t.as_slice()).unwrap()
 }
 
-pub fn from_utf8(b: &[u8]) -> &str {
-    std::str::from_utf8(b).unwrap()
-}
-
 pub fn is_int(b: &[u8]) -> bool {
     match b {
         // i8-i128

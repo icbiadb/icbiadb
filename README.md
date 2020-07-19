@@ -15,19 +15,21 @@
 
 IcbiaDB is a simple embedded 3-in-1(KV, table and JSON/BSON) database interface with JIT serialization.
 
-The basic goal though, is merely a fast reliable database with minimal preperation, minimal dependencies and decent performence on low-end computers with the ability to seamlessly store, manipulate and present primitives and complex data structures without too much hassle. Oh, and it comes with a free beer.
+The basic goal though, is merely a fast, reliable and easy-to-use database implementation for general use-cases with minimal preperation, minimal dependencies and decent performence on low-end computers with the ability to seamlessly store, manipulate and present primitives and complex data structures without too much hassle. Oh, and it comes with a free beer.
 
 
 **Features**
 
 
 **KV**:
-* Multiple data storages
+* Multiple storage options
 * Atomic operations on tuples, integers and strings
-* Filter by key, type name or value with or without regex(See "regex_search" feature)
+* Filter by key, type name or value with or without regex(See "regex" crate feature)
 
 
 **Tables**:
+* Easy macros and interface for creation, insertion, selection and deserialization
+* Seamless filtering with BvObject 
 
 
 **JSON**:
@@ -51,6 +53,7 @@ struct Article {
     text: String,
 }
 
+#[test]
 fn main() -> std::io::Result<()> {
     let mut db = icbiadb::kv::mem::<BTreeMap>();
 
@@ -69,18 +72,18 @@ fn main() -> std::io::Result<()> {
         db.incr("visitors");
     }
 
-    let article = Article {
-        title: "A title".to_string(),
-        text: "Hello World!".to_string(),
-    };
-    db.set("articles:0", &article);
-
     // Atomic operations on tuple elements, requires same type and length.
     db.set("my_tuple", (100, 100, "hello world!"));
     let mut bvtuple = db.get_tuple("my_tuple").unwrap();
     bvtuple.set(1, 111); // -> (100, 111, "hello world!")
     bvtuple.set(2, "hello!!!!!!!");
     bvtuple.value::<i32>(1); // -> 111
+
+    let article = Article {
+        title: "A title".to_string(),
+        text: "Hello World!".to_string(),
+    };
+    db.set("articles:0", &article);
 
     // Seamless string bytes comparison, integers are atm converted natively(from_le_bytes)
     db.filter(|(k, v)| v.type_name() == "IcbiaDB_tests::Article" || v.contains("this is a string"));

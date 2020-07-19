@@ -1,4 +1,4 @@
-//! A table database with generic interface and multiple storage options.
+//! A table database implementation
 //!
 //! # Example
 //!

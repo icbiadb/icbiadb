@@ -1,12 +1,10 @@
-//! A Key-Value database inspired by REDIS, with multiple storage options.
+//! A Key-Value database implementation with multiple storage options.
 //!
 //! # Storage
-//! * IndexedVec, first byte indexed vector. Recommended for smaller databases
-//! * HashMap
+//! * IndexedVec, first byte indexed vector, not recommended atm
 //! * BTreeMap
 //!
 //! See [Storage](../../storage/index.html)
-
 
 pub mod parser;
 pub mod types;
@@ -61,6 +59,9 @@ where
     KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]>,
     for<'a> &'a KV: IntoIterator<Item = (&'a BvString, &'a BvObject)>,
 {
+
+    /// Write the in-memory database to file
+    ///
     pub fn commit(&self) -> std::io::Result<()> {
         let f = std::fs::OpenOptions::new()
             .read(true)
@@ -102,14 +103,20 @@ where
         self.filter(|(_, v)| v.is_str() && set.is_match(v.as_slice()))
     }
 
+    /// Return the number of records stored in the database
+    ///
     pub fn len(&self) -> usize {
         self.records.len()
     }
 
+    /// Check if the key already exists
+    ///
     pub fn has_key<S: AsRef<str>>(&self, key: S) -> bool {
         self.records.has_key(key.as_ref().as_bytes())
     }
 
+    /// Increment key by 1, isize is used by default if the key don't exists
+    ///
     pub fn incr<S: AsRef<str>>(&mut self, key: S) {
         if self.has_key(key.as_ref()) {
             let v = self.get(key.as_ref()).unwrap().clone();
@@ -135,6 +142,8 @@ where
         }
     }
 
+    /// Increment key by T, isize is used by default if the key don't exists
+    ///
     pub fn incr_by<S, T>(&mut self, key: S, val: T)
     where
         S: AsRef<str>,
@@ -151,6 +160,8 @@ where
         }
     }
 
+    /// Decrement key by 1, isize is used by default if the key don't exists
+    ///
     pub fn decr<S: AsRef<str>>(&mut self, key: S) {
         if self.has_key(key.as_ref()) {
             let v = self.get(key.as_ref()).unwrap().clone();
@@ -176,6 +187,8 @@ where
         }
     }
 
+    /// Decrement key by T, isize is used by default if the key don't exists
+    ///
     pub fn decr_by<S, T>(&mut self, key: S, val: T)
     where
         S: AsRef<str>,
@@ -192,6 +205,8 @@ where
         }
     }
 
+    /// Replace value with mem::replace and return the old value
+    ///
     pub fn swap<S: AsRef<str>, T: serde::Serialize>(&mut self, key: S, value: T) -> BvObject {
         let new_obj = serialize_object(&value);
         let old_obj = self.records.get_mut(key.as_ref().as_bytes()).unwrap();
@@ -204,6 +219,8 @@ where
         panic!("Not same type or equal length")
     }
 
+    /// Set a key to value T
+    ///
     pub fn set<S: AsRef<str>, T: Sized + serde::ser::Serialize>(&mut self, key: S, value: T) {
         if !self.has_key(key.as_ref()) {
             // Create new
@@ -231,6 +248,8 @@ where
         }
     }
 
+    /// Set a key to value T with type name S
+    ///
     pub fn set_as<S: AsRef<str>, T: Sized + serde::ser::Serialize>(
         &mut self,
         key: S,
@@ -245,6 +264,8 @@ where
         self.set(key, value);
     }
 
+    /// Set a key to Vec<u8> with type name S
+    ///
     pub fn set_raw<S: AsRef<str>>(&mut self, key: S, type_name: S, value: Vec<u8>) {
         let value = BvObject::from_raw(
             normalize_type_name(type_name.as_ref().as_bytes()).to_vec(),
@@ -279,14 +300,20 @@ where
         }
     }
 
+    /// Retrieve a BvObject
+    ///
     pub fn get<S: AsRef<str>>(&self, key: S) -> Option<&BvObject> {
         self.records.get(key.as_ref().as_bytes())
     }
 
+    /// Retrieve and deserialize a value to T
+    ///
     pub fn get_value<T: serde::de::DeserializeOwned>(&self, key: &str) -> T {
         self.records.get(key.as_bytes()).unwrap().extract()
     }
 
+    /// Retrieve a value as BvTuple
+    ///
     pub fn get_tuple<S: AsRef<str>>(&mut self, key: S) -> Option<BvTuple> {
         match self.records.get_mut(key.as_ref().as_bytes()) {
             Some(t) => Some(BvTuple::from(t)),
@@ -294,10 +321,14 @@ where
         }
     }
 
+    /// Retrieve a value as BvStr
+    ///
     pub fn get_str<S: AsRef<str>>(&mut self, key: S) -> BvStr {
         BvStr::from_bvobject(self.records.get_mut(key.as_ref().as_bytes()).unwrap())
     }
 
+    /// Delete key and return the deleted object
+    ///
     pub fn del<S: AsRef<str>>(&mut self, key: S) -> BvObject {
         self.records.remove(key.as_ref().as_bytes())
     }

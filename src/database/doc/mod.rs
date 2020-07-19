@@ -1,4 +1,4 @@
-//! A document database with generic interface and multiple storage options.
+//! A document database implementation
 //!
 //! # Example
 //!

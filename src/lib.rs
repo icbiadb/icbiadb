@@ -3,26 +3,29 @@
 //! # Key-Value example
 //!
 //! ```
-//! let db = icbiadb::kv::create::<icbiadb::IndexedKvStorage>("my_kvs.idb");
+//! let db = icbiadb::kv::create::<BTreeMap>("my_kvs.idb");
 //! db.set("hello:world", 100);
 //! db.commit();
 //! ```
+//! See [KvDb](database/kv/struct.KvDb.html) for all methods.
 //!
 //! # Table example
 //!
 //! ```
 //! let db = icbiadb::table::create("my_tables.idb");
-//! db.set("hello:world", 100);
+//!
+//! if_not_exists_create! {db, "articles",
+//!     (title: String, date: String[unique])
+//! };
+//!
+//! let mut record = icbiadb::TableRow::default();
+//! record.set_col("title", "A short title");
+//! record.set_col("date", "today");
+//! db.insert_row("articles", record);
+//!
 //! db.commit();
 //! ```
 //!
-//! # Document example
-//!
-//! ```
-//! let db = icbiadb::doc::create("my_docs.idb");
-//! db.set("hello:world", 100);
-//! db.commit();
-//! ```
 
 #[cfg(test)]
 #[macro_use]
