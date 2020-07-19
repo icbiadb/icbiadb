@@ -2,28 +2,28 @@ pub mod reader;
 pub mod writer;
 
 use std::{
-    io::{BufReader, BufWriter, Seek, SeekFrom, Write},
+    io::{BufWriter, Seek, SeekFrom, Write},
     sync::RwLock,
 };
 
-use reader::Reader;
+//use reader::Reader;
 use writer::Writer;
 
-use crate::database::{table::TableDb, DocDb, KvDb};
+use crate::database::{table::TableDb, KvDb};
 
 use crate::storage::KvInterface;
 use crate::types::{BvObject, BvString};
 
 pub struct FileIO {
     writer: RwLock<Writer<BufWriter<std::fs::File>>>,
-    reader: RwLock<Reader<BufReader<std::fs::File>>>,
+    //reader: RwLock<Reader<BufReader<std::fs::File>>>,
 }
 
 impl FileIO {
     pub fn new(f: std::fs::File) -> Self {
         FileIO {
             writer: RwLock::new(Writer::new(BufWriter::new(f.try_clone().unwrap()))),
-            reader: RwLock::new(Reader::new(BufReader::new(f))),
+            //reader: RwLock::new(Reader::new(BufReader::new(f))),
         }
     }
 
