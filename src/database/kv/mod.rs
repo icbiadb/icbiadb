@@ -59,7 +59,6 @@ where
     KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]>,
     for<'a> &'a KV: IntoIterator<Item = (&'a BvString, &'a BvObject)>,
 {
-
     /// Write the in-memory database to file
     ///
     pub fn commit(&self) -> std::io::Result<()> {
