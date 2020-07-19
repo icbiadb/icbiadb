@@ -1,6 +1,6 @@
 #[macro_export]
 macro_rules! query_deserialize (
-	($v:expr, ($($field:ident:$type:ty),+)) => {		
+	($v:expr, ($($field:ident:$type:ty),+)) => {
 		$v.iter().map(|r| {
 			let ($($field,)+) = r;
 			($(icbiadb::deserialize_object::<$type>($field),)+)
@@ -9,11 +9,11 @@ macro_rules! query_deserialize (
 );
 
 #[macro_export]
-macro_rules! if_not_exists_declare {
+macro_rules! if_not_exists_create {
 	($db:expr, $name:literal, ($($key:ident:$type:ty $([$($opt:ident) +])?),+)) => {
-		if !$db.has_decl($name) {
-			let mut decl = $db.declare($name);
-			decl
+		if !$db.exists($name) {
+			let mut table = $db.new_table($name);
+			table
 			$(
 				.add_field::<$type>(stringify!($key))
 				$(
@@ -23,7 +23,7 @@ macro_rules! if_not_exists_declare {
 				)?
 			)+;
 
-			$db.insert_decl(&decl);
+			$db.create(table);
 		}
 	};
 }
@@ -65,20 +65,11 @@ macro_rules! query {
 			let row = vec![$((stringify!($key).as_bytes().to_vec(), icbiadb::serialize_object(&$val))),+].iter().cloned()
 				.collect::<std::collections::HashMap<_, _>>();
 
-			$db.decl_insert_row($name, icbiadb::decl::types::DeclarationRecord::from_hashmap(row)).unwrap();
+			$db.insert_row($name, icbiadb::database::table::types::TableRow::from_hashmap(row)).unwrap();
 		)+
 	}};
 
 	($db:expr, $name:literal, insert_many $v:expr) => {
-		$db.decl_insert_many($name, $v).unwrap();
+		$db.insert_many($name, $v).unwrap();
 	};
 }
-
-
-
-
-
-
-
-
-

@@ -1,58 +1,54 @@
-#![allow(bare_trait_objects, unused_macros)]
-#![cfg_attr(not(feature = "std"), no_std)]
+//! A lightweight database implementation for KV, table and document databases.
+//!
+//! # Key-Value example
+//!
+//! ```
+//! let db = icbiadb::kv::create::<BTreeMap>("my_kvs.idb");
+//! db.set("hello:world", 100);
+//! db.commit();
+//! ```
+//! See [KvDb](database/kv/struct.KvDb.html) for all methods.
+//!
+//! # Table example
+//!
+//! ```
+//! let db = icbiadb::table::create("my_tables.idb");
+//!
+//! if_not_exists_create! {db, "articles",
+//!     (title: String, date: String[unique])
+//! };
+//!
+//! let mut record = icbiadb::TableRow::default();
+//! record.set_col("title", "A short title");
+//! record.set_col("date", "today");
+//! db.insert_row("articles", record);
+//!
+//! db.commit();
+//! ```
+//!
 
 #[cfg(test)]
-#[macro_use] extern crate log;
-#[cfg(feature = "alloc")]
-extern crate alloc;
+#[macro_use]
+extern crate log;
 extern crate bincode;
 extern crate serde;
-#[cfg(feature="async-std-comp")]
-#[macro_use] extern crate async_trait;
-#[cfg(feature="async-std-comp")]
-extern crate async_std;
-#[cfg(feature="async-std-comp")]
-extern crate futures;
 
-pub mod utils;
-pub mod decl;
-pub mod prelude;
-pub mod parser;
-pub mod db;
-pub mod slice;
-pub mod types;
+mod byte_size;
+pub mod database;
+pub mod fio;
 pub mod macros;
+pub mod prelude;
+pub mod slice;
 pub mod storage;
-mod mem;
-mod fio;
+pub mod types;
+pub mod utils;
 
-pub use db::Db;
-pub use decl::types::DeclarationRecord;
-pub use utils::{
-	normalize_type_name,
-	serialize, 
-	serialize_object, 
-	serialize_to_bytevec, 
-	deserialize, 
-	deserialize_object, 
-	deserialize_bytevec, 
+pub use database::{
+    kv,
+    table::{self, types::TableRow},
+    {DocDb, KvDb, TableDb},
 };
-
-
-pub fn create<S: AsRef<str>>(file_name: S) -> std::io::Result<db::Db> {
-	db::Db::create(file_name)
-}
-
-pub fn read<S: AsRef<str>>(file_name: S) -> std::io::Result<db::Db> {
-	db::Db::read(file_name)
-}
-
-pub fn read_to_mem<S: AsRef<str>>(file_name: S) -> std::io::Result<db::Db> {
-	db::Db::read_to_mem(file_name)
-}
-
-pub fn mem() -> std::io::Result<db::Db> {
-	db::Db::mem()
-}
-
-
+pub use utils::{
+    deserialize, deserialize_bytevec, deserialize_object, normalize_type_name, serialize,
+    serialize_object, serialize_to_bytevec,
+};

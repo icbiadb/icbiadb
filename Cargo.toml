@@ -1,22 +1,21 @@
 [package]
 name = "icbiadb"
-version = "0.2.3"
+version = "0.3.0"
 authors = ["Emanuel GS <grundligt@hotmail.com>"]
 edition = "2018"
-description = "IcbiaDB | I can't believe it's a database | Simple embedded KV & data structures database"
+description = "IcbiaDB | I can't believe it's a database | Simple embedded 3-in-1 database"
 license = "MIT"
 repository = "https://github.com/icbiadb/icbiadb"
 keywords = ["database"]
 readme = "README.md"
 categories = ["database", "database-implementations"]
 
+[profile.dev]
+opt-level = 1
 
 [dependencies]
-serde = {version="1.0.104", features=["derive"]}
+serde = {version="1.0.114", features=["derive"]}
 bincode = "1.2.1"
-async-std = {version="1.5.0", optional=true}
-async-trait = {version="0.1.24", optional=true}
-rayon = {version="1.3.0", optional=true}
 regex = {version="1.3.7", optional=true}
 
 [dev-dependencies]
@@ -24,12 +23,6 @@ log = "0.4.8"
 env_logger = "0.7.1"
 
 [features]
-default = ["std"]
 regex_search = ["regex"]
-std = []
-unstable = []
-alloc = []
-aio = ["async-trait", "rayon"]
-async-std-comp = ["async-std", "aio"]
 
 
