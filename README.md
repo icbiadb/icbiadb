@@ -51,7 +51,6 @@ struct Article {
     text: String,
 }
 
-#[test]
 fn main() -> std::io::Result<()> {
     let mut db = icbiadb::kv::mem::<BTreeMap>();
 
