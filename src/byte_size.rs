@@ -32,8 +32,8 @@ pub mod globals {
         }
     }
 
+    /// Module of Key-Value byte sizes
     pub mod kv {
-        /// Module of Key-Value byte sizes
         use super::*;
 
         /// KV record identifier
