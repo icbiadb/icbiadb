@@ -1,7 +1,19 @@
 ## Changelog
 
 
+### 0.3.2, --
+
+**Changes**
+* Remove string tag from bytevec before converting to BvObj::as_str
+* Add BvObj::as_str_slice
+* Add BvObject::as_str_slice
+
+
+---
+
+
 ### 0.3.0, 2020-07-19
+
 
 **Breaking changes**
 * *icbiadb::Db* has been replaced with *KvDb*, *TableDb*, *DocDb*
@@ -17,7 +29,6 @@
 
 **Table db**
 * Change TableRow.insert to TableRow.set_col
-
 
 
 ---
