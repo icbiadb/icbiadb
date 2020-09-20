@@ -271,7 +271,8 @@ where
             value,
         );
         assert!(!key.as_ref().is_empty() && !value.type_name().is_empty());
-        self.set(key, value);
+        //self.set(key, value);
+        self.records.insert(key.as_ref().as_bytes().to_vec().into(), value);
     }
 
     pub fn set_many<S: AsRef<str>, T: Sized + serde::ser::Serialize>(
