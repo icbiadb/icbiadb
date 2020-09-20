@@ -51,8 +51,7 @@ pub fn extract<'a, KV: KvInterface<Key=Vec<u8>, Value=BvObject, RefKey=[u8]>>(v:
 	assert_eq!(v[..3], kv::IDENT);
 	let idxs = seqs_find_all(&v, &kv::IDENT);
 
-	//let mut vec = std::collections::HashMap::with_capacity(idxs.len());
-	let mut storage = KV::default();
+	let mut storage = KV::with_capacity(idxs.len());
 
 	let mut cursor = Cursor::new(&v);
 	for idx in idxs {

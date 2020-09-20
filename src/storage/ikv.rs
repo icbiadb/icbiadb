@@ -142,6 +142,12 @@ impl KvInterface for IndexedVec {
     type Value = BvObject;
     type RefKey = [u8];
 
+    fn with_capacity(cap: usize) -> Self {
+        IndexedVec {
+            inner: IndexVec(Vec::with_capacity(cap))
+        }
+    }
+
     fn indexes_len(&self) -> usize {
         self.inner.len()
     }

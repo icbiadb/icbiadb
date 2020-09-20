@@ -1,7 +1,6 @@
 //! A table database implementation
 //!
 
-
 pub mod parser;
 pub mod types;
 

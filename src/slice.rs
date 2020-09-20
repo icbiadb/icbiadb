@@ -1,5 +1,4 @@
 /// Slice helper functions
-
 pub fn is_zero(s: &[u8]) -> bool {
     for b in s {
         if *b != 0 {

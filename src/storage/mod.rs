@@ -12,6 +12,8 @@ pub trait KvInterface: std::default::Default + IntoIterator {
     type Value;
     type RefKey: ?Sized;
 
+    fn with_capacity(cap: usize) -> Self;
+
     fn has_key(&self, key: &Self::RefKey) -> bool;
 
     fn is_empty(&self) -> bool;

@@ -12,18 +12,11 @@ use crate::database::{
     kv::parser::extract_records,
     table::parser::{extract_tables, rows::extract_rows},
 };
-/*
-use crate::{
-    icbiadb::IcbiaDB,
-    database::{DocDb, KvDb, TableDb},
-};
-*/
 
 #[derive(Debug, Deserialize)]
 #[repr(C)]
 pub struct Header {
     pub table_length: u32,
-    //pub records_length: u64,
     pub table_rows_length: u64,
 }
 
