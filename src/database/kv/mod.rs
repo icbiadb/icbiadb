@@ -329,7 +329,7 @@ where
 
     /// Delete key and return the deleted object
     ///
-    pub fn del<S: AsRef<str>>(&mut self, key: S) -> BvObject {
+    pub fn del<S: AsRef<str>>(&mut self, key: S) -> Option<BvObject> {
         self.records.remove(key.as_ref().as_bytes())
     }
 }

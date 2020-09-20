@@ -27,5 +27,5 @@ pub trait KvInterface: std::default::Default + IntoIterator {
 
     fn get_mut(&mut self, key: &Self::RefKey) -> Option<&mut Self::Value>;
 
-    fn remove(&mut self, key: &Self::RefKey) -> Self::Value;
+    fn remove(&mut self, key: &Self::RefKey) -> Option<Self::Value>;
 }

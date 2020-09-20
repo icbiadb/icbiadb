@@ -46,8 +46,8 @@ impl KvInterface for BTreeMap {
         self.0.get_mut(key)
     }
 
-    fn remove(&mut self, key: &Self::RefKey) -> Self::Value {
-        self.0.remove(key).unwrap()
+    fn remove(&mut self, key: &Self::RefKey) -> Option<Self::Value> {
+        self.0.remove(key)
     }
 }
 

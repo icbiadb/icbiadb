@@ -70,12 +70,16 @@ impl<I: Eq, V> IndexVec<I, V> {
         self.0.push(record)
     }
 
-    fn remove<Q>(&mut self, key: &Q) -> V
+    fn remove<Q>(&mut self, key: &Q) -> Option<V>
     where
         I: Borrow<Q> + PartialEq<Q>,
         Q: Eq + ?Sized,
     {
-        self.0.remove(self.key_index(key).unwrap()).1
+        if let Some(index) = self.key_index(key) {
+            return Some(self.0.remove(index).1)
+        }
+
+        None
     }
 }
 
@@ -203,7 +207,7 @@ impl KvInterface for IndexedVec {
         self.inner[&key[0]].get_mut(key)
     }
 
-    fn remove(&mut self, key: &[u8]) -> BvObject {
+    fn remove(&mut self, key: &[u8]) -> Option<BvObject> {
         self.inner[&key[0]].remove(key)
     }
 }
