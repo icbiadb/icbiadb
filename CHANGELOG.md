@@ -1,9 +1,11 @@
 ## Changelog
 
 
-### 0.3.2, --
+### 0.3.2, 2020-09-21
+
 
 **Changes**
+
 * Remove string tag from bytevec before converting to BvObj::as_str
 * KvDb::del & KvInterface::remove now returns Option<BvObject>
 * KvDb::set_raw no longer serialize BvObject
