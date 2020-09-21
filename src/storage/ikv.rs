@@ -76,7 +76,7 @@ impl<I: Eq, V> IndexVec<I, V> {
         Q: Eq + ?Sized,
     {
         if let Some(index) = self.key_index(key) {
-            return Some(self.0.remove(index).1)
+            return Some(self.0.remove(index).1);
         }
 
         None
@@ -148,7 +148,7 @@ impl KvInterface for IndexedVec {
 
     fn with_capacity(cap: usize) -> Self {
         IndexedVec {
-            inner: IndexVec(Vec::with_capacity(cap))
+            inner: IndexVec(Vec::with_capacity(cap)),
         }
     }
 
