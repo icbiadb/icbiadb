@@ -5,6 +5,9 @@
 
 **Changes**
 * Remove string tag from bytevec before converting to BvObj::as_str
+* KvDb::del & KvInterface::remove now returns Option<BvObject>
+* KvDb::set_raw no longer serialize BvObject
+* Add KvInterface::with_capacity
 * Add BvObj::as_str_slice
 * Add BvObject::as_str_slice
 
