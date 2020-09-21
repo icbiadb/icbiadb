@@ -1,10 +1,11 @@
 [Latest Version]: https://img.shields.io/crates/v/icbiadb
 
+[docs.rs]: https://docs.rs/icbiadb/badge.svg
 [crates.io]: https://crates.io/crates/icbiadb
 [Build Status]: https://travis-ci.com/icbiadb/icbiadb.svg?branch=master
 [travis]: https://travis-ci.com/github/icbiadb/icbiadb
 
-## IcbiaDB | I can't believe it's a database &emsp; [![Build Status]][travis] [![Latest Version]][crates.io]
+## IcbiaDB | I can't believe it's a database &emsp; [![Build Status]][travis] [![Latest Version]][crates.io] [![docs.rs]][docs.rs]
 
 
 **Not recommended for production**
