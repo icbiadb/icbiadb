@@ -1,5 +1,18 @@
 ## Changelog
 
+### 0.3.3, -
+
+**Changes**
+
+**Key-Value db**
+
+* Disabled IndexedKv storage
+* Added export/import interface to storages and KvDb
+
+
+
+---
+
 
 ### 0.3.2, 2020-09-21
 
