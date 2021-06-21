@@ -12,18 +12,11 @@ use crate::database::{
     kv::parser::extract_records,
     table::parser::{extract_tables, rows::extract_rows},
 };
-/*
-use crate::{
-    icbiadb::IcbiaDB,
-    database::{DocDb, KvDb, TableDb},
-};
-*/
 
 #[derive(Debug, Deserialize)]
 #[repr(C)]
 pub struct Header {
     pub table_length: u32,
-    //pub records_length: u64,
     pub table_rows_length: u64,
 }
 
@@ -78,9 +71,14 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
         self.reader.seek(SeekFrom::Start(5))?;
         let mut dbuf = Vec::new();
         self.reader.read_to_end(&mut dbuf)?;
-        #[cfg(test)]
-        debug!("[Reading kv records] Read {}", dbuf.len());
-        Ok(extract_records(&dbuf))
+
+        if dbuf.len() < 3 {
+            Ok(KV::default())
+        } else {
+            #[cfg(test)]
+            debug!("[Reading kv records] Read {}", dbuf.len());
+            Ok(extract_records(&dbuf))
+        }
     }
 
     pub fn read_table_rows(&mut self, len: u64) -> std::io::Result<Vec<TableRow>> {

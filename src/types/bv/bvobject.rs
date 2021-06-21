@@ -94,6 +94,10 @@ impl BvObject {
     pub fn as_slice(&self) -> &[u8] {
         self.raw.as_slice()
     }
+
+    pub fn as_str_slice(&self) -> &[u8] {
+        &self.raw.as_slice()[8..]
+    }
 }
 
 impl std::ops::Deref for BvObject {

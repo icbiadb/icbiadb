@@ -10,6 +10,10 @@ impl KvInterface for BTreeMap {
     type Value = BvObject;
     type RefKey = [u8];
 
+    fn with_capacity(_: usize) -> Self {
+        unimplemented!("BTreemap don't support with_capacity")
+    }
+
     fn has_key(&self, key: &[u8]) -> bool {
         self.0.contains_key(key)
     }
@@ -42,8 +46,8 @@ impl KvInterface for BTreeMap {
         self.0.get_mut(key)
     }
 
-    fn remove(&mut self, key: &Self::RefKey) -> Self::Value {
-        self.0.remove(key).unwrap()
+    fn remove(&mut self, key: &Self::RefKey) -> Option<Self::Value> {
+        self.0.remove(key)
     }
 }
 

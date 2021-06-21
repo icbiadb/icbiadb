@@ -79,11 +79,15 @@ impl<'a> BvObj<'a> {
     }
 
     pub fn as_str(&self) -> &str {
-        std::str::from_utf8(self.raw.as_slice()).unwrap()
+        std::str::from_utf8(&self.raw.as_slice()[8..]).unwrap()
     }
 
     pub fn as_slice(&self) -> &[u8] {
         self.raw.as_slice()
+    }
+
+    pub fn as_str_slice(&self) -> &[u8] {
+        &self.raw.as_slice()[8..]
     }
 
     pub fn as_usize(&self) -> usize {

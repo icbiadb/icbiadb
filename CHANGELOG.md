@@ -1,7 +1,24 @@
 ## Changelog
 
 
+### 0.3.2, 2020-09-21
+
+
+**Changes**
+
+* Remove string tag from bytevec before converting to BvObj::as_str
+* KvDb::del & KvInterface::remove now returns Option<BvObject>
+* KvDb::set_raw no longer serialize BvObject
+* Add KvInterface::with_capacity
+* Add BvObj::as_str_slice
+* Add BvObject::as_str_slice
+
+
+---
+
+
 ### 0.3.0, 2020-07-19
+
 
 **Breaking changes**
 * *icbiadb::Db* has been replaced with *KvDb*, *TableDb*, *DocDb*
@@ -17,7 +34,6 @@
 
 **Table db**
 * Change TableRow.insert to TableRow.set_col
-
 
 
 ---

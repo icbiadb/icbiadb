@@ -279,7 +279,9 @@ where
             value,
         );
         assert!(!key.as_ref().is_empty() && !value.type_name().is_empty());
-        self.set(key, value);
+        //self.set(key, value);
+        self.records
+            .insert(key.as_ref().as_bytes().to_vec().into(), value);
     }
 
     pub fn set_many<S: AsRef<str>, T: Sized + serde::ser::Serialize>(
@@ -336,7 +338,7 @@ where
 
     /// Delete key and return the deleted object
     ///
-    pub fn del<S: AsRef<str>>(&mut self, key: S) -> BvObject {
+    pub fn del<S: AsRef<str>>(&mut self, key: S) -> Option<BvObject> {
         self.records.remove(key.as_ref().as_bytes())
     }
 }
