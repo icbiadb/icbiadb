@@ -1,5 +1,9 @@
 //! A lightweight database implementation for KV, table and document databases.
 //!
+//! # Notes
+//!
+//! Bincode serialization defaults integers to i32/u32 and f32 for floats without any explicit declarations
+//!
 //! # Key-Value example
 //!
 //! ```

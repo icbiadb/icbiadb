@@ -2,12 +2,14 @@
 //!
 
 pub mod btreemap;
-pub mod ikv;
+//pub mod ikv;
 
 pub use btreemap::BTreeMap;
-pub use ikv::IndexedVec;
+//pub use ikv::IndexedVec;
 
-pub trait KvInterface: std::default::Default + IntoIterator {
+use crate::types::{BvString, BvObject};
+
+pub trait KvInterface: std::default::Default + IntoIterator + Import + Export {
     type Key;
     type Value;
     type RefKey: ?Sized;
@@ -22,8 +24,15 @@ pub trait KvInterface: std::default::Default + IntoIterator {
     fn insert_many(&mut self, records: Vec<(Self::Key, Self::Value)>);
 
     fn get(&self, key: &Self::RefKey) -> Option<&Self::Value>;
-
     fn get_mut(&mut self, key: &Self::RefKey) -> Option<&mut Self::Value>;
 
     fn remove(&mut self, key: &Self::RefKey) -> Self::Value;
+}
+
+pub trait Import {
+    fn import(&mut self, from: Vec<(BvString, BvObject)>);
+}
+
+pub trait Export {
+    fn export(&self) -> Vec<(BvString, BvObject)>;
 }

@@ -309,3 +309,15 @@ impl<'a> std::iter::Iterator for IndexedVecIter<'a> {
         item
     }
 }
+
+impl<I: Eq, V> super::Import for IndexVec<I, V> {
+    fn import(&mut self, mut from: Vec<(BvString, BvObject)>) {
+        self.0 = from;
+    }
+}
+
+impl<I: Eq, V> super::Export for IndexVec<I, V> {
+    fn export(self) -> Vec<(BvString, BvObject)> {
+        self.0.into_iter().map(|(k, v)| (k, v)).collect::<Vec<(BvString, BvObject)>>()
+    }
+}

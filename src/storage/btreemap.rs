@@ -1,5 +1,5 @@
 use super::KvInterface;
-use crate::types::{BvObject, BvString};
+use crate::types::{BvObj, BvObject, BvString};
 use std::collections::BTreeMap as btmp;
 
 #[derive(Default)]
@@ -76,5 +76,17 @@ impl<'a> std::iter::Iterator for BTreeMapIntoIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next()
+    }
+}
+
+impl super::Import for BTreeMap {
+    fn import(&mut self, mut from: Vec<(BvString, BvObject)>) {
+        self.0 = from.drain(0..from.len()).collect::<btmp<BvString, BvObject>>();
+    }
+}
+
+impl super::Export for BTreeMap {
+    fn export(&self) -> Vec<(BvString, BvObject)> {
+        self.0.iter().map(|(k, v)| (k.clone(), v.clone())).collect::<Vec<(BvString, BvObject)>>()
     }
 }

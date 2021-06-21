@@ -74,6 +74,14 @@ where
         Ok(())
     }
 
+    pub fn import(&mut self, data: Vec<(BvString, BvObject)>) {
+        self.records.import(data);
+    }
+
+    pub fn export(&self) -> Vec<(BvString, BvObject)> {
+        self.records.export()
+    }
+
     /// Search keys for regex match
     #[cfg(feature = "regex_search")]
     pub fn key_regex<S: AsRef<str>>(&self, regex: S) -> Vec<(&BvString, &BvObject)> {
