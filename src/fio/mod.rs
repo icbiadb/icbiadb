@@ -14,15 +14,16 @@ use crate::database::{table::TableDb, KvDb};
 use crate::storage::KvInterface;
 use crate::types::{BvObject, BvString};
 
-pub struct FileIO {
-    writer: RwLock<Writer<BufWriter<std::fs::File>>>,
+pub struct FileIO<W: Write + Seek> {
+    writer: RwLock<Writer<BufWriter<W>>>,
     //reader: RwLock<Reader<BufReader<std::fs::File>>>,
 }
 
-impl FileIO {
-    pub fn new(f: std::fs::File) -> Self {
+impl<W: Write + Seek> FileIO<W> {
+    pub fn new(f: W) -> Self
+        where W: Write + Seek {
         FileIO {
-            writer: RwLock::new(Writer::new(BufWriter::new(f.try_clone().unwrap()))),
+            writer: RwLock::new(Writer::new(BufWriter::new(f))),
             //reader: RwLock::new(Reader::new(BufReader::new(f))),
         }
     }

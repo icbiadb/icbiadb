@@ -74,6 +74,16 @@ where
         Ok(())
     }
 
+    /// Write the in-memory database to impl Write + Seek
+    ///
+    pub fn commit_to<W>(&self, writer: W) -> std::io::Result<()>
+        where W: std::io::Write + std::io::Seek {
+        let mut fio = fio::FileIO::new(writer);
+        fio.commit_kv_db(self)?;
+
+        Ok(())
+    }
+
     pub fn import(&mut self, data: Vec<(BvString, BvObject)>) {
         self.records.import(data);
     }

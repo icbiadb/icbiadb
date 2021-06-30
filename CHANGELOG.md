@@ -6,6 +6,7 @@
 
 **Key-Value db**
 
+* Added method commit_to
 * Disabled IndexedKv storage
 * Added export/import interface to storages and KvDb
 
