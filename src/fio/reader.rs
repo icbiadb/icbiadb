@@ -68,12 +68,13 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
         let mut dbuf = Vec::new();
         self.reader.read_to_end(&mut dbuf)?;
 
+        println!("{:?}", dbuf);
         if dbuf.len() <= 5 {
             Ok(KV::default())
         } else {
             #[cfg(test)]
             debug!("[Reading kv records] Read {}", dbuf.len());
-            Ok(extract_records(&dbuf))
+            Ok(extract_records(&dbuf[5..]))
         }
     }
 
