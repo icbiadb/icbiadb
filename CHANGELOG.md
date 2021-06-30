@@ -1,13 +1,22 @@
 ## Changelog
 
-### 0.3.3, -
+### 0.3.4, 2021-06-30
 
 **Changes**
 
 **Key-Value db**
 
-* Added function read_from
-* Added method commit_to
+* Added kv::read_from
+* Added KvDb::commit_to
+* Update stamp length when reading kvdb files
+
+
+### 0.3.3, 2021-06-22
+
+**Changes**
+
+**Key-Value db**
+
 * Disabled IndexedKv storage
 * Added export/import interface to storages and KvDb
 
