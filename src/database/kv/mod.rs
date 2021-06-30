@@ -17,6 +17,8 @@ use crate::storage::KvInterface;
 use crate::types::*;
 use crate::utils::{normalize_type_name, serialize, serialize_object};
 
+/// Create a memory-database
+///
 pub fn mem<KV: KvInterface>() -> KvDb<KV> {
     KvDb {
         file_name: String::new(),
@@ -24,6 +26,8 @@ pub fn mem<KV: KvInterface>() -> KvDb<KV> {
     }
 }
 
+/// Open/create a database file
+///
 pub fn create<KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]>>(
     file_name: &str,
 ) -> std::io::Result<KvDb<KV>> {
@@ -44,6 +48,26 @@ pub fn create<KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]>>(
 
     Ok(KvDb::<KV> {
         file_name: file_name.to_string(),
+        records: reader.read_kv_records()?,
+    })
+}
+
+/// Read from data type implementing io::Seek + io::Read
+///
+pub fn read_from<R, KV>(read: R) -> std::io::Result<KvDb<KV>>
+    where R: std::io::Read + std::io::Seek,
+    KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]> {
+    let mut reader = fio::reader::Reader::new(BufReader::new(read));
+
+    if reader.is_empty() {
+        return Ok(KvDb {
+            file_name: String::new(),
+            records: KV::default(),
+        });
+    }
+
+    Ok(KvDb::<KV> {
+        file_name: String::new(),
         records: reader.read_kv_records()?,
     })
 }

@@ -6,10 +6,10 @@
 
 **Key-Value db**
 
+* Added function read_from
 * Added method commit_to
 * Disabled IndexedKv storage
 * Added export/import interface to storages and KvDb
-
 
 
 ---
