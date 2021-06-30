@@ -1,5 +1,5 @@
 use super::KvInterface;
-use crate::types::{BvObj, BvObject, BvString};
+use crate::types::{BvObject, BvString};
 use std::collections::BTreeMap as btmp;
 
 #[derive(Default)]
