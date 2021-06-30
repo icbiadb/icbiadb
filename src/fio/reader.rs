@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::io::SeekFrom;
 
 use serde::Deserialize;
 
@@ -66,13 +65,10 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
     pub fn read_kv_records<KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]>>(
         &mut self,
     ) -> std::io::Result<KV> {
-        //let mut dbuf = vec![0u8; len as usize];
-        //self.reader.read_exact(&mut dbuf)?;
-        self.reader.seek(SeekFrom::Start(5))?;
         let mut dbuf = Vec::new();
         self.reader.read_to_end(&mut dbuf)?;
 
-        if dbuf.len() < 3 {
+        if dbuf.len() <= 5 {
             Ok(KV::default())
         } else {
             #[cfg(test)]
