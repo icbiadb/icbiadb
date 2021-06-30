@@ -1,5 +1,14 @@
 ## Changelog
 
+### 0.3.5, 2021-06-30
+
+**Changes**
+
+**Key-Value db**
+
+* Remove file stamp when passing buffer to parser::extract_records
+
+
 ### 0.3.4, 2021-06-30
 
 **Changes**
