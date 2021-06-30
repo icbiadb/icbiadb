@@ -55,8 +55,10 @@ pub fn create<KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]>>(
 /// Read from data type implementing io::Seek + io::Read
 ///
 pub fn read_from<R, KV>(read: R) -> std::io::Result<KvDb<KV>>
-    where R: std::io::Read + std::io::Seek,
-    KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]> {
+where
+    R: std::io::Read + std::io::Seek,
+    KV: KvInterface<Key = BvString, Value = BvObject, RefKey = [u8]>,
+{
     let mut reader = fio::reader::Reader::new(BufReader::new(read));
 
     if reader.is_empty() {
@@ -101,7 +103,9 @@ where
     /// Write the in-memory database to impl Write + Seek
     ///
     pub fn commit_to<W>(&self, writer: W) -> std::io::Result<()>
-        where W: std::io::Write + std::io::Seek {
+    where
+        W: std::io::Write + std::io::Seek,
+    {
         let mut fio = fio::FileIO::new(writer);
         fio.commit_kv_db(self)?;
 

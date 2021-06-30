@@ -21,7 +21,9 @@ pub struct FileIO<W: Write + Seek> {
 
 impl<W: Write + Seek> FileIO<W> {
     pub fn new(f: W) -> Self
-        where W: Write + Seek {
+    where
+        W: Write + Seek,
+    {
         FileIO {
             writer: RwLock::new(Writer::new(BufWriter::new(f))),
             //reader: RwLock::new(Reader::new(BufReader::new(f))),

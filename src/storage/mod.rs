@@ -7,7 +7,7 @@ pub mod btreemap;
 pub use btreemap::BTreeMap;
 //pub use ikv::IndexedVec;
 
-use crate::types::{BvString, BvObject};
+use crate::types::{BvObject, BvString};
 
 pub trait KvInterface: std::default::Default + IntoIterator + Import + Export {
     type Key;
