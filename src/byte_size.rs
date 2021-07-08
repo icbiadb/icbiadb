@@ -4,9 +4,11 @@
 pub mod globals {
 
     pub const USIZE_BS: usize = std::mem::size_of::<usize>();
-    pub const U16_BS: usize = std::mem::size_of::<u16>();
-    pub const U32_BS: usize = std::mem::size_of::<u32>();
-    pub const U64_BS: usize = std::mem::size_of::<u64>();
+    pub const U16_BS: usize = 2;
+    pub const U32_BS: usize = 4;
+    pub const U64_BS: usize = 8;
+
+    pub const ICBIA_STAMP: usize = 5;
 
     pub const K_LEN_BS: usize = 1; // Key length byte size
     pub const TN_LEN_BS: usize = 1; // Type name length byte size

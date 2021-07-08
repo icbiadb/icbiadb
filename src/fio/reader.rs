@@ -1,11 +1,10 @@
 use std::collections::HashMap;
-
 use serde::Deserialize;
-
 use crate::database::table::types::{TableMap, TableRow};
 use crate::storage::KvInterface;
 use crate::types::{BvObject, BvString};
 use crate::utils::*;
+use super::FILE_STAMP;
 
 use crate::database::{
     kv::parser::extract_records,
@@ -68,13 +67,12 @@ impl<T: std::io::BufRead + std::io::Seek> Reader<T> {
         let mut dbuf = Vec::new();
         self.reader.read_to_end(&mut dbuf)?;
 
-        println!("{:?}", dbuf);
-        if dbuf.len() <= 5 {
+        if dbuf.len() <= FILE_STAMP.len() {
             Ok(KV::default())
         } else {
             #[cfg(test)]
-            debug!("[Reading kv records] Read {}", dbuf.len());
-            Ok(extract_records(&dbuf[5..]))
+            debug!("[Reading kv records] Read {}", FILE_STAMP.len());
+            Ok(extract_records(&dbuf[FILE_STAMP.len()..]))
         }
     }
 

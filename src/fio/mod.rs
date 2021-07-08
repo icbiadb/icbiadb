@@ -14,6 +14,8 @@ use crate::database::{table::TableDb, KvDb};
 use crate::storage::KvInterface;
 use crate::types::{BvObject, BvString};
 
+pub const FILE_STAMP: &[u8] = b"KVIDB";
+
 pub struct FileIO<W: Write + Seek> {
     writer: RwLock<Writer<BufWriter<W>>>,
     //reader: RwLock<Reader<BufReader<std::fs::File>>>,
@@ -35,7 +37,7 @@ impl<W: Write + Seek> FileIO<W> {
         for<'a> &'a KV: IntoIterator<Item = (&'a BvString, &'a BvObject)>,
     {
         let mut writer = self.writer.write().unwrap();
-        writer.write_all(b"KVIDB")?;
+        writer.write_all(FILE_STAMP)?;
 
         for record in (&kv.records).into_iter() {
             writer.write_kv_record(record)?;
