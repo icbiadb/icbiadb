@@ -1,6 +1,6 @@
 [package]
 name = "icbiadb"
-version = "0.3.6"
+version = "0.3.7"
 authors = ["EGS <grundligt@hotmail.com>"]
 edition = "2018"
 description = "I can't believe it's a database | Simple embedded 3-in-1 database"

@@ -1,5 +1,20 @@
 ## Changelog
 
+
+### 0.3.7, 2021-07-09
+
+**Changes**
+
+* Truncate database files before commit
+
+
+### 0.3.6, 2021-07-08
+
+**Key-Value db**
+
+* Remove println left behind in release
+
+
 ### 0.3.5, 2021-06-30
 
 **Changes**
