@@ -15,7 +15,7 @@
 [Changelog](https://github.com/icbiadb/icbiadb/blob/master/CHANGELOG.md)
 
 
-IcbiaDB is a simple embedded 3-in-1(KV, table and JSON/BSON) database interface with JIT serialization.
+IcbiaDB is a simple embedded 3-in-1(KV, table and JSON/BSON) database interface with JIT deserialization.
 
 The basic goal though, is merely a fast, reliable and easy-to-use database implementation for general use-cases with minimal preperation, minimal dependencies and decent performence on low-end computers with the ability to seamlessly store, manipulate and present primitives and complex data structures without too much hassle. Oh, and it comes with a free beer.
 
