@@ -89,9 +89,9 @@ where
     ///
     pub fn commit(&self) -> std::io::Result<()> {
         let f = std::fs::OpenOptions::new()
-            .read(true)
-            .write(true)
             .create(true)
+            .write(true)
+            .truncate(true)
             .open(&self.file_name)?;
 
         let mut fio = fio::FileIO::new(f);
